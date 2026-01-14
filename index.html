@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>PianoKid Evo - Mobile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<style>
+/* ========== RESET & BASE SMARTPHONE ========== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0a0e;
+  color: #eee;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  touch-action: manipulation;
+}
+
+/* ========== TOP BAR SIMPLIFIÉE ========== */
+#topBar {
+  flex-shrink: 0;
+  height: auto;
+  background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 255, 255, .2);
+  z-index: 100;
+}
+
+#menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Boutons compacts */
+#modeSelect {
+  background: #000;
+  color: #0ff;
+  border: 2px solid #0ff;
+  padding: 0.6rem;
+  border-radius: 8px;
+  min-width: 180px;
+  font-size: 0.9rem;
+}
+
+#playBtn {
+  background: linear-gradient(135deg, #00ff66, #00cc44);
+  color: #000;
+  font-weight: bold;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#stopBtn {
+  background: linear-gradient(135deg, #ff0066, #ff3300);
+  color: #fff;
+  font-weight: bold;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#speedBox {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.speedBtn, #editTimingBtn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  background: #333;
+  color: #aaa;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.speedBtn.active {
+  background: #0ff;
+  color: #000;
+  box-shadow: 0 0 10px #0ff;
+}
+
+#microBtn {
+  background: #333;
+  color: #aaa;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+#microBtn.listening {
+  background: #f0f;
+  color: #000;
+  box-shadow: 0 0 12px #f0f;
+}
+
+/* État profil */
+#miniIndic {
+  font-size: 0.8rem;
+  color: #0ff;
+  text-align: center;
+}
+
+/* ========== FALL ZONE (NOTES QUI CHUTENT) ========== */
+#fallZone {
+  flex: 1;
+  position: relative;
+  min-height: 200px;
+  background: #111;
+  box-shadow: inset 0 0 20px #000;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+/* ✅ LIGNE REPOSITIONNÉE JUSTE AU-DESSUS DU PIANO */
+#line {
+  position: absolute;
+  /* 130px = hauteur piano (120px) + marge (10px) */
+  bottom: 130px;
+  left: 0; right: 0;
+  height: 4px;
+  background: #0ff;
+  box-shadow: 0 0 12px #0ff;
+  z-index: 3;
+}
+
+/* ✅ EN MODE PAYSAGE : 110px = hauteur piano (100px) + marge (10px) */
+@media (orientation: landscape) {
+  #line {
+    bottom: 110px !important;
+  }
+}
+
+.note {
+  position: absolute;
+  width: 44px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: bold;
+  top: -50px;
+  font-size: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 2;
+  transform: translateX(-50%);
+  padding-top: 5px;
+  transition: none;
+}
+
+.note.waiting {
+  animation: pulse 0.8s infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: scale(1) translateX(-50%); }
+  to { transform: scale(1.1) translateX(-50%); }
+}
+
+/* ========== PIANO 61 TOUCHES ========== */
+#pianoWrapper {
+  flex-shrink: 0;
+  height: 120px; /* ✅ HAUTEUR PIANO */
+  background: #0a0a0e;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+/* ✅ EN MODE PAYSAGE : PIANO PLUS BAS */
+@media (orientation: landscape) {
+  #pianoWrapper {
+    height: 100px !important; /* Piano plus bas en paysage */
+  }
+}
+
+#piano {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-width: max-content;
+  margin: 0 auto;
+}
+
+.key {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 0 0 8px 8px;
+  transition: transform .1s, filter .2s;
+}
+
+.key:active {
+  transform: translateY(2px);
+}
+
+.key.selected {
+  border: 3px solid #0ff !important;
+  box-shadow: 0 0 20px #0ff !important;
+}
+
+.white {
+  width: 44px;
+  height: 116px;
+  background: linear-gradient(to bottom, #fff 0%, #f8f8f8 50%, #ddd 100%);
+  border: 1px solid #ccc;
+  border-top: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.black {
+  position: absolute;
+  top: 0;
+  width: 28px;
+  height: 96px;
+  background: linear-gradient(to bottom, #333 0%, #000 100%);
+  border: 1px solid #000;
+  border-top: none;
+  z-index: 2;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.7);
+}
+
+.label {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+  line-height: 1.2;
+}
+
+.black .label {
+  color: #fff !important;
+  bottom: 8px;
+  font-size: 9px;
+}
+
+#pianoWrapper::-webkit-scrollbar {
+  height: 10px;
+}
+
+#pianoWrapper::-webkit-scrollbar-track {
+  background: #222;
+}
+
+#pianoWrapper::-webkit-scrollbar-thumb {
+  background: #0ff;
+  border-radius: 5px;
+}
+
+/* ========== MODALS ========== */
+.modal-box {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: #222;
+  border: 2px solid #0ff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #fff;
+  text-align: center;
+}
+
+.modal-content h3 {
+  color: #0ff;
+  margin-bottom: 1rem;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8rem;
+  color: #0ff;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 10;
+}
+</style>
+</head>
+<body>
+
+<!-- Écran de démarrage -->
+<div id="startScreen" style="position: fixed; inset: 0; background: #0a0a0e; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000;">
+  <h2>🎹 PianoKid Evo</h2>
+  <p>Clique n'importe où pour activer le son</p>
+</div>
+
+<!-- TOP BAR MENU -->
+<div id="topBar">
+  <div id="menu">
+    <select id="modeSelect">
+      <option value="">-- Choisir partition --</option>
+      <optgroup label="Cours">
+        <option value="facile1">Main Droite</option>
+        <option value="facile2">Main Gauche</option>
+        <option value="facile3">Les 2 Mains</option>
+      </optgroup>
+      <optgroup label="Chansons">
+                <option value="pirates">Pirates des Caraïbes</option>
+                <option value="anniversaire">Joyeux Anniversaire</option>
+      </optgroup>
+      <optgroup label="Profil">
+        <option value="profile_management">⚙️ Gérer Profils</option>
+      </optgroup>
+    </select>
+
+    <button id="playBtn"> Jouer</button>
+    <button id="stopBtn"> Stop</button>
+
+    <div id="speedBox">
+      <button class="speedBtn active" data-ms="450">Normal</button>
+      <button class="speedBtn" data-ms="600">Lent</button>
+      <button class="speedBtn" data-ms="300">Rapide</button>
+    </div>
+
+    <button id="editTimingBtn">✏️ Timing</button>
+    <button id="microBtn">🎤 Micro</button>
+  </div>
+
+  <div id="miniIndic">
+    <span id="userInfoTop"></span>
+  </div>
+</div>
+
+<!-- ZONE DE JEU -->
+<div id="fallZone">
+  <div id="line"></div>
+</div>
+
+<!-- PIANO -->
+<div id="pianoWrapper">
+  <div id="piano"></div>
+</div>
+
+<!-- MODAL TIMING -->
+<div id="noteTimingEditor" class="modal-box">
+  <div class="modal-content">
+    <span class="close-btn" id="closeTimingEditor">&times;</span>
+    <h3>Éditer le timing</h3>
+    <div id="timingList"></div>
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+      <button id="saveTimingBtn">💾 Sauvegarder</button>
+      <button id="cancelTimingBtn">❌ Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROFILS -->
+<div id="profileModal" class="modal-box">
+  <div class="modal-content">
+    <h3>Gestion des Profils</h3>
+    <select id="profileSelectModal"><option value="">-- Sélectionner --</option></select>
+    <input id="createProfileInputModal" placeholder="Nouveau profil" maxlength="12">
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+      <button id="createProfileBtnModal">Créer</button>
+      <button id="deleteProfileBtnModal">Supprimer</button>
+      <button id="closeProfileModal">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MICRO -->
+<div id="microModal" class="modal-box">
+  <div class="modal-content">
+    <h3>Microphone</h3>
+    <p>Impossible d'accéder au micro.</p>
+    <button id="closeMicroModal">OK</button>
+  </div>
+</div>
+
+<!-- FEUX D'ARTIFICE -->
+<div id="fireworks"></div>
+
+<script>
+/* ========== PROFILS ========== */
+let currentUser = null;
+const profileSelectModal = document.getElementById('profileSelectModal');
+const createProfileInputModal = document.getElementById('createProfileInputModal');
+const createProfileBtnModal = document.getElementById('createProfileBtnModal');
+const deleteProfileBtnModal = document.getElementById('deleteProfileBtnModal');
+const closeProfileModal = document.getElementById('closeProfileModal');
+const profileModal = document.getElementById('profileModal');
+
+function saveProfiles(p){ localStorage.setItem('pianoProfiles', JSON.stringify(p)); }
+function loadProfiles(){ return JSON.parse(localStorage.getItem('pianoProfiles') || '{}'); }
+
+function updateProfileSelect(){
+  const profiles = loadProfiles();
+  profileSelectModal.innerHTML = '<option value="">-- Sélectionner --</option>';
+  Object.keys(profiles).sort().forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    profileSelectModal.appendChild(opt);
+  });
+}
+
+function selectProfile(name){
+  if(!name){
+    currentUser = null;
+    document.getElementById('userInfoTop').textContent = '';
+    return;
+  }
+  currentUser = name;
+  document.getElementById('userInfoTop').textContent = `✓ ${name}`;
+  localStorage.setItem('pianoLastProfile', name);
+}
+
+function showProfileModal() {
+  updateProfileSelect();
+  profileModal.style.display = 'flex';
+}
+
+function hideProfileModal() {
+  profileModal.style.display = 'none';
+}
+
+createProfileBtnModal.onclick = () => {
+  const name = createProfileInputModal.value.trim();
+  if(!name) return;
+  const profiles = loadProfiles();
+  if(profiles[name]){
+    createProfileInputModal.value = '';
+    createProfileInputModal.placeholder = 'Existe !';
+    setTimeout(() => createProfileInputModal.placeholder = 'Nouveau profil', 1500);
+    return;
+  }
+  profiles[name] = {best: 0};
+  saveProfiles(profiles);
+  updateProfileSelect();
+  profileSelectModal.value = name;
+  selectProfile(name);
+  createProfileInputModal.value = '';
+};
+
+deleteProfileBtnModal.onclick = () => {
+  const selectedProfile = profileSelectModal.value;
+  if(!selectedProfile) return;
+  if(!confirm(`Supprimer le profil "${selectedProfile}" ?\n(Cette action est irréversible)`)) return;
+  const profiles = loadProfiles();
+  delete profiles[selectedProfile];
+  saveProfiles(profiles);
+  if(currentUser === selectedProfile){
+    currentUser = null;
+    document.getElementById('userInfoTop').textContent = '';
+  }
+  updateProfileSelect();
+  profileSelectModal.value = '';
+};
+
+closeProfileModal.onclick = hideProfileModal;
+
+// Init profils
+(function initProfiles(){
+  updateProfileSelect();
+  const last = localStorage.getItem('pianoLastProfile');
+  if(last){
+    selectProfile(last);
+  }
+})();
+
+/* ========== CONSTANTES & UTILS ========== */
+const START = 36, END = 96;
+const NAMES = ['C','','D','','E','F','','G','','A','','B'];
+const SHARP_NAMES = ['','C♯','D♯','','F♯','G♯','A♯','','C♯','D♯','','F♯'];
+const FLAT_NAMES = ['','D♭','E♭','','G♭','A♭','B♭','','D♭','E♭','','G♭'];
+const NATURAL_COL = ['#ff0033','','#ff6600','','#99ff66','#33aa33','','#9900ff','','#66ccff','','#cc99ff'];
+
+function getSharpFlatColor(midiNote) {
+  const naturalIndex = midiNote % 12;
+  const map = { 1:NATURAL_COL[0], 3:NATURAL_COL[2], 6:NATURAL_COL[4], 8:NATURAL_COL[5], 10:NATURAL_COL[7] };
+  return map[naturalIndex] || '#888';
+}
+
+const fallZone = document.getElementById('fallZone');
+const piano = document.getElementById('piano');
+
+/* ========== CONSTRUCTION PIANO 61 TOUCHES ========== */
+for(let m = START; m <= END; m++){
+  const rel = m % 12;
+  const isBlack = [1,3,6,8,10].includes(rel);
+  if(!isBlack){
+    const k = document.createElement('div');
+    k.className = 'key white';
+    k.dataset.m = m;
+    const lab = document.createElement('div');
+    lab.className = 'label';
+    lab.textContent = NAMES[rel] + (Math.floor(m / 12) - 1);
+    lab.style.color = NATURAL_COL[rel];
+    k.appendChild(lab);
+    piano.appendChild(k);
+  }
+}
+
+for(let m = START; m <= END; m++){
+  const rel = m % 12;
+  if([1,3,6,8,10].includes(rel)){
+    const k = document.createElement('div');
+    k.className = 'key black';
+    k.dataset.m = m;
+    const lab = document.createElement('div');
+    lab.className = 'label';
+    lab.innerHTML = `<span style="color: ${getSharpFlatColor(m)}">${SHARP_NAMES[rel]}</span><br><small>${FLAT_NAMES[rel]}</small>`;
+    lab.style.color = '#fff';
+    lab.style.fontSize = '9px';
+    lab.style.bottom = '8px';
+    lab.style.lineHeight = '1.2';
+    k.appendChild(lab);
+    const whiteKeyIndex = Array.from(piano.querySelectorAll('.white')).findIndex((_, i) => {
+      let whiteCount = 0;
+      for(let j = START; j <= m; j++) if (![1,3,6,8,10].includes(j % 12)) whiteCount++;
+      return whiteCount === i + 1;
+    });
+    const whiteKey = piano.querySelectorAll('.white')[whiteKeyIndex];
+    if(whiteKey){
+      const whiteRect = whiteKey.getBoundingClientRect();
+      const pianoRect = piano.getBoundingClientRect();
+      k.style.left = (whiteRect.left - pianoRect.left - 14) + 'px';
+    }
+    piano.appendChild(k);
+  }
+}
+
+/* ========== PARTITIONS SIMPLIFIÉES ========== */
+function normalizeNoteData(n, partitionKey) {
+  if(typeof n === 'number') {
+    const base = { note: Math.abs(n), duration: 1, spacing: 1.0, hand: n < 60 ? 'left' : 'right' };
+    if(partitionKey === 'facile2') base.hand = 'left';
+    return base;
+  }
+  if(!n.spacing) n.spacing = 1.0;
+  if(partitionKey === 'facile2' && !n.hand) n.hand = 'left';
+  return n;
+}
+
+const niveaux = {
+  facile1: [
+    {note: 60, duration: 1.0, spacing: 1.0},
+    {note: 62, duration: 1.0, spacing: 1.0},
+    {note: 64, duration: 1.0, spacing: 1.0},
+    {note: 65, duration: 1.0, spacing: 1.0},
+    {note: 67, duration: 1.0, spacing: 1.0},
+    {note: 67, duration: 1.0, spacing: 1.0},
+    {note: 65, duration: 1.0, spacing: 1.0},
+    {note: 64, duration: 1.0, spacing: 1.0},
+    {note: 62, duration: 1.0, spacing: 1.0},
+    {note: 60, duration: 1.0, spacing: 1.0}
+  ],
+  facile2: [
+     {note: 48, duration: 1.0, spacing: 1.0, hand: 'left'},
+  {note: 50, duration: 1.0, spacing: 1.0, hand: 'left'},
+  ],
+  facile3: [
+    {note: 60, duration: 1.0, spacing: 1.0},
+    {note: 62, duration: 1.0, spacing: 1.0},
+    {note: 64, duration: 1.0, spacing: 1.0},
+    {note: 65, duration: 1.0, spacing: 1.0},
+    {note: 67, duration: 1.0, spacing: 1.0},
+    {note: 55, duration: 1.0, spacing: 1.0},
+    {note: 53, duration: 1.0, spacing: 1.0},
+    {note: 52, duration: 1.0, spacing: 1.0},
+    {note: 50, duration: 1.0, spacing: 1.0},
+    {note: 48, duration: 1.0, spacing: 1.0}
+  ]
+};
+
+const chansons = {
+   pirates: [
+    {note: 57, duration: 0.5, spacing: 0.5}, // La
+    {note: 60, duration: 0.5, spacing: 0.5}, // Do
+    {note: 62, duration: 1.0, spacing: 1.0}, // Ré
+    {note: 62, duration: 1.0, spacing: 1.0}, // Ré
+    {note: 62, duration: 0.5, spacing: 0.5}, // Ré
+    {note: 63, duration: 0.5, spacing: 0.5}, // Mi
+    {note: 65, duration: 1.0, spacing: 1.0}, // Fa
+  ],
+ anniversaire: [
+    {note: 60, duration: 0.5, spacing: 0.5}, {note: 60, duration: 0.5, spacing: 1.0},
+    {note: 62, duration: 1.0, spacing: 1.0}, {note: 60, duration: 1.0, spacing: 1.0},
+    {note: 65, duration: 1.0, spacing: 1.0}, {note: 64, duration: 2.0, spacing: 2.0}
+  ],
+
+};
+
+/* ========== VARIABLES GLOBALES ========== */
+let notes = [];
+let isSong = false;
+let isTwoHandCourse = false;
+let isPlaying = false;
+let currentPartitionData = null;
+let originalPartitionData = null;
+let score = 0, combo = 0;
+let currentTempo = 450; // ✅ TEMPO INITIALISÉ
+let microListening = false;
+
+/* ========== DROP NOTE CORRIGÉE ========== */
+function drop(noteData){
+  const {note, duration, spacing, hand} = noteData;
+  const k = document.querySelector(`[data-m="${note}"]`);
+  if(!k) return;
+  
+  const el = document.createElement('div');
+  el.className = 'note';
+  const nameSpan = document.createElement('span');
+  const noteName = NAMES[note % 12] || '♯';
+  const isBlackKey = [1,3,6,8,10].includes(note % 12);
+  
+  if(isBlackKey && SHARP_NAMES[note % 12]){
+    nameSpan.innerHTML = `${noteName}<span style="color: #000; font-size: 12px;">#</span>`;
+  } else {
+    nameSpan.textContent = noteName;
+  }
+  
+  nameSpan.style.color = '#222';
+  nameSpan.style.fontSize = '14px';
+  nameSpan.style.fontWeight = '700';
+  nameSpan.style.marginTop = '4px';
+  el.appendChild(nameSpan);
+  
+  const noteColor = isBlackKey ? getSharpFlatColor(note) : (NATURAL_COL[note % 12] || '#888');
+  el.style.background = noteColor;
+  
+  const baseHeight = 44;
+  const height = Math.max(22, baseHeight * duration);
+  el.style.height = height + 'px';
+  el.style.width = '44px';
+  
+  const pianoRect = piano.getBoundingClientRect();
+  const fallRect = fallZone.getBoundingClientRect();
+  const keyRect = k.getBoundingClientRect();
+  const keyCenter = keyRect.left + keyRect.width / 2;
+  const fallLeft = fallRect.left;
+  el.style.left = (keyCenter - fallLeft) + 'px';
+  el.style.boxShadow = `0 0 16px 4px ${noteColor}`;
+  
+  const handInd = document.createElement('div');
+  handInd.className = 'hand-indicator';
+  handInd.textContent = isTwoHandCourse ? (hand === 'left' ? 'G' : 'D') : '';
+  handInd.style.fontSize = '8px';
+  handInd.style.marginTop = '2px';
+  el.appendChild(handInd);
+  
+  const durInd = document.createElement('div');
+  durInd.style.fontSize = '8px';
+  durInd.style.marginTop = '2px';
+  durInd.textContent = duration.toFixed(2);
+  el.appendChild(durInd);
+  
+  fallZone.appendChild(el);
+  
+  const o = {
+    note, 
+    el, 
+    y: -height, 
+    ok: false, 
+    duration, 
+    spacing, 
+    hand, 
+    active: false, 
+    played: false,
+    startTime: performance.now()
+  };
+  notes.push(o);
+  
+  function animate(){
+    if(!isPlaying && isSong) return;
+    
+    const now = performance.now();
+    const elapsed = now - o.startTime;
+    const fallSpeed = (600 / currentTempo) * 2;
+    o.y = -height + (elapsed / 1000) * fallSpeed * 60;
+    
+    const linePos = fallZone.clientHeight - 130;
+    const stopThreshold = linePos - height;
+    
+    if(!o.played && o.y >= stopThreshold && o.y <= stopThreshold + 10){
+      o.played = true;
+      if(isSong && !microListening){ 
+        playNote(o.note, o.duration); 
+      }
+    }
+    
+    if(!o.ok && !isSong && o.y >= stopThreshold){
+      o.y = stopThreshold;
+      el.classList.add('waiting');
+    } else {
+      el.classList.remove('waiting');
+    }
+    
+    el.style.top = o.y + 'px';
+    
+    if(o.y > fallZone.clientHeight){
+      if(!o.ok) combo = 0;
+      el.remove();
+      notes = notes.filter(x => x !== o);
+      return;
+    }
+    
+    requestAnimationFrame(animate);
+  }
+  
+  requestAnimationFrame(animate);
+}
+
+/* ========== SÉQUENCE DE JEU ========== */
+let sequenceController = null;
+let currentPartition = null;
+
+function startSequence(partition){
+  let seq;
+  seq = niveaux[partition] || chansons[partition] || niveaux.facile1.map(normalizeNoteData);
+  isSong = !!chansons[partition];
+  isTwoHandCourse = ['facile1','facile2','facile3'].includes(partition);
+  isPlaying = true;
+  currentPartitionData = JSON.parse(JSON.stringify(seq));
+  originalPartitionData = JSON.parse(JSON.stringify(seq));
+  
+  sequenceController = {notes: seq, index: 0, isActive: true, isPaused: false, timeout: null};
+  playNextNote();
+}
+
+function playNextNote(){
+  if(!sequenceController || !sequenceController.isActive) return;
+  if(sequenceController.index >= sequenceController.notes.length){
+    setTimeout(() => stopBtn.onclick(), 500);
+    return;
+  }
+  if(sequenceController.isPaused){
+    setTimeout(playNextNote, 50);
+    return;
+  }
+  
+  const currentNote = sequenceController.notes[sequenceController.index];
+  drop(currentNote);
+  
+  const delay = currentTempo * currentNote.duration * (currentNote.spacing || 1.0);
+  sequenceController.index++;
+  
+  if(!isSong) sequenceController.isPaused = true;
+  if(isSong && sequenceController.index < sequenceController.notes.length){
+    sequenceController.timeout = setTimeout(playNextNote, delay);
+  } else if(!isSong){
+    sequenceController.isPaused = true;
+  }
+}
+
+/* ========== AUDIO ========== */
+let audioCtx = null;
+let songAudioCtx = null;
+
+function initAudio() {
+  if(!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  if(songAudioCtx && songAudioCtx.state === 'suspended') {
+    songAudioCtx.resume();
+  }
+}
+
+function playSound(midiNote, duration = 0.3) {
+  initAudio();
+  const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function playNote(midiNote, duration) {
+  if(!isPlaying || !isSong || microListening) return;
+  
+  if(!songAudioCtx) {
+    songAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(songAudioCtx.state === 'suspended') {
+    songAudioCtx.resume();
+  }
+  
+  const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+  const osc = songAudioCtx.createOscillator();
+  const gain = songAudioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.value = frequency;
+  const now = songAudioCtx.currentTime;
+  const attack = 0.01, sustain = Math.max(0.1, duration * 0.7), release = Math.max(0.05, duration * 0.3);
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.4, now + attack);
+  gain.gain.exponentialRampToValueAtTime(0.2, now + attack + sustain);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + attack + sustain + release + 0.05);
+  osc.connect(gain);
+  gain.connect(songAudioCtx.destination);
+  osc.start(now);
+  osc.stop(now + attack + sustain + release + 0.05);
+}
+
+function flash(midiNote){
+  const k = document.querySelector(`[data-m="${midiNote}"]`);
+  if(!k) return;
+  k.style.filter = 'brightness(1.4)';
+  setTimeout(() => k.style.filter = '', 150);
+}
+
+function handleKeyPress(midiNote){
+  playSound(midiNote);
+  flash(midiNote);
+  
+  if(isSong){
+    notes.forEach(x => {
+      if(!x.ok && x.note === midiNote){
+        x.ok = true;
+        score++;
+        combo++;
+      }
+    });
+  } else {
+    const waitingNotes = notes.filter(n => !n.ok);
+    if(waitingNotes.length > 0){
+      const linePos = fallZone.clientHeight - 130;
+      let closestNote = null;
+      let minDistance = Infinity;
+      waitingNotes.forEach(note => {
+        const noteBottom = note.y + note.el.offsetHeight;
+        const distance = Math.abs(noteBottom - linePos);
+        if(distance < minDistance){
+          minDistance = distance;
+          closestNote = note;
+        }
+      });
+      
+      if(closestNote && closestNote.note === midiNote){
+        closestNote.ok = true;
+        score++;
+        combo++;
+        
+        if(sequenceController && sequenceController.isPaused){
+          sequenceController.isPaused = false;
+          setTimeout(playNextNote, 50);
+        }
+      } else {
+        combo = 0;
+      }
+    } else {
+      playSound(midiNote);
+    }
+  }
+}
+
+piano.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const k = e.target.closest('.key');
+  if(!k) return;
+  handleKeyPress(+k.dataset.m);
+});
+
+piano.addEventListener('click', e => {
+  const k = e.target.closest('.key');
+  if(!k) return;
+  handleKeyPress(+k.dataset.m);
+});
+
+/* ========== CONTRÔLES ========== */
+document.getElementById('modeSelect').onchange = (e) => {
+  if(e.target.value === 'profile_management'){
+    showProfileModal();
+    e.target.value = '';
+    return;
+  }
+  currentPartition = e.target.value;
+};
+
+document.getElementById('playBtn').onclick = () => {
+  if(!currentPartition){ alert('Choisis une partition !'); return; }
+  if(sequenceController){
+    sequenceController.isActive = false;
+    if(sequenceController.timeout) clearTimeout(sequenceController.timeout);
+  }
+  notes.forEach(x => x.el.remove());
+  notes = [];
+  score = 0;
+  combo = 0;
+  startSequence(currentPartition);
+};
+
+document.getElementById('stopBtn').onclick = () => {
+  if(sequenceController){
+    sequenceController.isActive = false;
+    if(sequenceController.timeout) clearTimeout(sequenceController.timeout);
+    sequenceController = null;
+  }
+  notes.forEach(x => x.el.remove());
+  notes = [];
+  isPlaying = false;
+};
+
+/* ========== SPEED CONTROLS ========== */
+const speedBox = document.getElementById('speedBox');
+speedBox.addEventListener('click', e => {
+  const btn = e.target.closest('.speedBtn');
+  if(!btn) return;
+  document.querySelectorAll('.speedBtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTempo = +btn.dataset.ms;
+});
+
+/* ========== ÉCRAN DE DÉMARRAGE ========== */
+const startScreen = document.getElementById('startScreen');
+function unlockAudio() {
+  initAudio();
+  startScreen.style.display = 'none';
+  document.removeEventListener('click', unlockAudio);
+  document.removeEventListener('keydown', unlockAudio);
+  document.removeEventListener('touchstart', unlockAudio);
+}
+document.addEventListener('click', unlockAudio);
+document.addEventListener('keydown', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
+
+/* ========== MODALS ========== */
+document.getElementById('closeTimingEditor').onclick = () => {
+  document.getElementById('noteTimingEditor').style.display = 'none';
+};
+
+document.getElementById('editTimingBtn').onclick = () => {
+  document.getElementById('noteTimingEditor').style.display = 'flex';
+};
+
+document.getElementById('closeMicroModal').onclick = () => {
+  document.getElementById('microModal').style.display = 'none';
+};
+
+document.getElementById('microBtn').onclick = () => {
+  alert('Fonctionnalité microphone - Requiert HTTPS et autorisation utilisateur');
+};
+
+/* ========== SAVE/LOAD TIMING ========== */
+document.getElementById('saveTimingBtn').onclick = () => {
+  alert('Timing sauvegardé !');
+  document.getElementById('noteTimingEditor').style.display = 'none';
+};
+
+document.getElementById('cancelTimingBtn').onclick = () => {
+  document.getElementById('noteTimingEditor').style.display = 'none';
+};
+</script>
+</body>
+</html>
