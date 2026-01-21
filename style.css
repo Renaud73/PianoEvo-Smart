@@ -1,38 +1,67 @@
-body { margin: 0; background: #121212; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: none; }
-
-/* Barre de navigation du haut */
-#nav-bar {
-    position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-    background: #1a1a1a; display: flex; justify-content: space-around;
-    align-items: center; z-index: 100000; border-bottom: 2px solid #333;
+:root {
+  --bg: #050508;
+  --accent: #00f2ff;
+  --accent2: #ff00ea;
+  --text: #ffffff;
+  --easy: #2ecc71;
+  --medium: #f1c40f;
+  --hard: #e74c3c;
 }
 
-.btn-pro {
-    border: none; border-radius: 6px; padding: 10px 15px;
-    font-weight: bold; color: white; cursor: pointer; z-index: 100001;
-}
-.btn-pro.red { background: #d63031; }
-.btn-pro.blue { background: #0984e3; }
-
-#live-score { font-family: monospace; font-size: 22px; color: #fdcb6e; }
-#mic-label { position: fixed; top: 65px; left: 10px; font-size: 11px; color: #ff7675; z-index: 1000; }
-
-/* Zone où tombent les notes */
-#fall-zone {
-    position: absolute; top: 60px; bottom: 160px; left: 0; right: 0;
-    pointer-events: none; z-index: 5;
+body { 
+    margin: 0; 
+    font-family: 'Segoe UI', system-ui, sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    overflow: hidden; 
+    touch-action: manipulation;
 }
 
-/* Piano en bas */
-#piano-area { position: fixed; bottom: 0; width: 100%; height: 160px; background: #000; z-index: 1000; }
-#piano { display: flex; height: 100%; width: 100%; }
+/* --- MENU --- */
+#main-menu { position: fixed; inset: 0; background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%); z-index: 1000; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
+.profile-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+.user-info { display: flex; gap: 12px; align-items: center; cursor: pointer; }
+.avatar { font-size: 1.5rem; background: var(--accent); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.username { font-weight: bold; font-size: 0.9rem; }
+.level-tag { font-size: 0.7rem; opacity: 0.7; }
+.logo { font-size: 2rem; font-weight: 900; text-align: center; margin-bottom: 20px; background: linear-gradient(to right, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-.key { flex: 1; background: white; border: 1px solid #999; border-radius: 0 0 5px 5px; position: relative; }
-.key.black { background: #222; height: 60%; z-index: 2; margin-left: -2.5%; margin-right: -2.5%; flex: 0.6; border: none; }
-.key.active { background: #74b9ff !important; }
+/* --- NAVIGATION & CARTES --- */
+.nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 12px; }
+.tab-btn { flex: 1; background: transparent; border: none; color: #888; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+.tab-btn.active { background: var(--accent); color: #000; }
 
-/* Menu */
-#main-menu { position: fixed; inset: 0; background: #121212; z-index: 200000; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
-.card { background: #2d3436; width: 80%; padding: 20px; margin: 10px; border-radius: 10px; border-left: 5px solid #0984e3; }
-.tab-btn { background: #444; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 20px; }
-.tab-btn.active { background: #0984e3; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; cursor: pointer; text-align: center; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 0.6rem; font-weight: bold; margin-bottom: 8px; color: #000; text-transform: uppercase; }
+.badge-easy { background: var(--easy); }
+.badge-medium { background: var(--medium); }
+.badge-hard { background: var(--hard); }
+
+/* --- JEU --- */
+#progress-container { position: fixed; top: 0; width: 100%; height: 6px; background: #222; z-index: 3000; }
+#progress-inner { height: 100%; background: var(--accent); width: 0%; transition: 0.3s; box-shadow: 0 0 10px var(--accent); }
+#collision-line { position: absolute; bottom: 140px; width: 100%; height: 3px; background: var(--accent); box-shadow: 0 0 15px var(--accent); z-index: 1500; }
+
+.falling-note { position: absolute; width: 45px; border-radius: 5px; background: linear-gradient(to bottom, var(--accent), #005f73); z-index: 1400; border: 1px solid rgba(255,255,255,0.2); }
+.falling-note.hit { filter: brightness(2); opacity: 0.1; transition: 0.2s; }
+.falling-note.waiting { animation: pulse 0.8s infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
+
+/* --- PIANO MOBILE --- */
+#piano-container { position: fixed; bottom: 0; width: 100%; height: 140px; overflow-x: auto; background: #000; display: flex; z-index: 2000; -webkit-overflow-scrolling: touch; }
+#piano { display: flex; padding: 0 5px; }
+.key { width: 48px; height: 100%; background: white; border: 1px solid #ccc; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; color: #888; font-size: 0.7rem; font-weight: bold; border-radius: 0 0 5px 5px; }
+.key.black { background: #222; width: 32px; height: 65%; margin-left: -16px; margin-right: -16px; z-index: 10; color: transparent; }
+.key.active { background: var(--accent) !important; color: #000; }
+
+#live-score { position: fixed; top: 20px; left: 15px; font-size: 1.2rem; font-weight: bold; z-index: 2100; }
+#detected-note { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); font-size: 1.8rem; color: var(--accent); z-index: 2100; font-weight: 900; }
+.btn-close { position: fixed; top: 15px; right: 15px; background: #e74c3c; border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; z-index: 3100; }
+
+/* --- MODAL --- */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 4000; }
+.modal-content { background: #1a1a2e; padding: 25px; border-radius: 20px; border: 1px solid var(--accent); width: 280px; display: flex; flex-direction: column; gap: 15px; }
+input { padding: 12px; border-radius: 10px; border: none; background: #333; color: white; }
+.btn-add { background: var(--accent); border: none; padding: 12px; border-radius: 10px; font-weight: bold; }
+.btn-secondary { background: transparent; color: white; border: 1px solid #555; padding: 10px; border-radius: 10px; }
