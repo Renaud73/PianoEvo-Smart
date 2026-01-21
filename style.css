@@ -1,36 +1,38 @@
-body { margin: 0; background: #1a1a1a; color: white; font-family: sans-serif; overflow: hidden; touch-action: manipulation; }
+body { margin: 0; background: #121212; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: none; }
 
-/* En-tête du jeu */
-#game-header {
-    position: absolute; top: 0; left: 0; right: 0; height: 60px;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 0 15px; z-index: 10000; background: rgba(0,0,0,0.5);
+/* Barre de navigation du haut */
+#nav-bar {
+    position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+    background: #1a1a1a; display: flex; justify-content: space-around;
+    align-items: center; z-index: 100000; border-bottom: 2px solid #333;
 }
 
-/* Style des boutons Modernes */
-button {
-    padding: 10px 18px; border: none; border-radius: 8px;
-    font-weight: bold; cursor: pointer; font-size: 14px;
-    transition: transform 0.1s, background 0.2s;
+.btn-pro {
+    border: none; border-radius: 6px; padding: 10px 15px;
+    font-weight: bold; color: white; cursor: pointer; z-index: 100001;
 }
-button:active { transform: scale(0.95); }
+.btn-pro.red { background: #d63031; }
+.btn-pro.blue { background: #0984e3; }
 
-.exit-btn { background: #ff4757; color: white; }
-#fullscreen-btn { background: #2f3542; color: white; border: 1px solid #57606f; }
+#live-score { font-family: monospace; font-size: 22px; color: #fdcb6e; }
+#mic-label { position: fixed; top: 65px; left: 10px; font-size: 11px; color: #ff7675; z-index: 1000; }
 
-#live-score { font-family: monospace; font-size: 24px; color: #f1c40f; }
-#mic-status { position: absolute; top: 65px; left: 15px; font-size: 12px; font-weight: bold; z-index: 10000; }
+/* Zone où tombent les notes */
+#fall-zone {
+    position: absolute; top: 60px; bottom: 160px; left: 0; right: 0;
+    pointer-events: none; z-index: 5;
+}
 
-/* Zone de chute des notes */
-#fall-zone { position: absolute; top: 0; bottom: 180px; left: 0; right: 0; z-index: 5; pointer-events: none; }
+/* Piano en bas */
+#piano-area { position: fixed; bottom: 0; width: 100%; height: 160px; background: #000; z-index: 1000; }
+#piano { display: flex; height: 100%; width: 100%; }
 
-/* Piano */
-#piano-container { position: absolute; bottom: 0; width: 100%; height: 180px; background: #222; z-index: 10; }
-#piano { display: flex; height: 100%; position: relative; }
-.key { flex: 1; border: 1px solid #333; background: white; border-radius: 0 0 5px 5px; position: relative; }
-.key.black { background: #333; height: 60%; z-index: 2; margin-left: -2%; margin-right: -2%; border-radius: 0 0 3px 3px; flex: 0.7; }
-.key.active { background: #3498db !important; }
+.key { flex: 1; background: white; border: 1px solid #999; border-radius: 0 0 5px 5px; position: relative; }
+.key.black { background: #222; height: 60%; z-index: 2; margin-left: -2.5%; margin-right: -2.5%; flex: 0.6; border: none; }
+.key.active { background: #74b9ff !important; }
 
-/* Menu principal */
-#main-menu { position: fixed; inset: 0; background: #1a1a1a; z-index: 20000; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
-.card { background: #2f3542; padding: 20px; border-radius: 12px; margin: 10px; width: 80%; text-align: center; border-left: 5px solid #3498db; }
+/* Menu */
+#main-menu { position: fixed; inset: 0; background: #121212; z-index: 200000; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
+.card { background: #2d3436; width: 80%; padding: 20px; margin: 10px; border-radius: 10px; border-left: 5px solid #0984e3; }
+.tab-btn { background: #444; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 20px; }
+.tab-btn.active { background: #0984e3; }
