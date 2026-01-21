@@ -1,39 +1,35 @@
-// --- 1. DONNÉES DES COURS ET MUSIQUES ---
-const data_cours = [
-    { titre: "Do Central (MD)", diff: 'easy', notes: [{note:'C4',f:1,h:'right'},{note:'D4',f:2,h:'right'},{note:'E4',f:3,h:'right'}] },
-    { titre: "Do Central (MG)", diff: 'easy', notes: [{note:'C4',f:1,h:'left'},{note:'B3',f:2,h:'left'},{note:'A3',f:3,h:'left'}] },
-    { titre: "Gamme de Do", diff: 'medium', notes: [{note:'C4',f:1,h:'right'},{note:'D4',f:2,h:'right'},{note:'E4',f:3,h:'right'},{note:'F4',f:1,h:'right'},{note:'G4',f:2,h:'right'},{note:'A4',f:3,h:'right'},{note:'B4',f:4,h:'right'},{note:'C5',f:5,h:'right'}] }
-];
-
-const data_musiques = [
-    { titre: "Pirates des Caraïbes", diff: 'hard', notes: [{note:'A3',f:1,h:'right'},{note:'C4',f:2,h:'right'},{note:'D4',f:3,h:'right'},{note:'D4',f:3,h:'right'},{note:'E4',f:4,h:'right'},{note:'F4',f:5,h:'right'},{note:'G4',f:1,h:'right'},{note:'E4',f:3,h:'right'},{note:'D4',f:2,h:'right'},{note:'C4',f:1,h:'right'},{note:'D4',f:2,h:'right'}]},
-    { titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4',f:1,h:'right'},{note:'C4',f:1,h:'right'},{note:'C4',f:1,h:'right'},{note:'D4',f:2,h:'right'},{note:'E4',f:3,h:'right'}]}
-];
-
+// --- 1. CONFIGURATION DES NOTES (FREQUENCES) ---
 const noteFrequencies = {
     'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
     'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
     'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'D#5': 622.25, 'E5': 659.25, 'F5': 698.46, 'F#5': 739.99, 'G5': 783.99, 'G#5': 830.61, 'A5': 880.00, 'A#5': 932.33, 'B5': 987.77
 };
 
-// --- 2. VARIABLES GLOBALES ---
 let audioCtx, analyser, dataArray, isMicrophoneActive = false;
 let notesOnScreen = [], currentScore = 0, isPaused = false, currentMode = 'step';
 
-// --- 3. SYSTÈME MICROPHONE ---
+// --- 2. ACTIVATION DU MICROPHONE ---
 async function setupMicrophone() {
     if (isMicrophoneActive) return;
     try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const microphone = audioCtx.createMediaStreamSource(stream);
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 2048;
         dataArray = new Float32Array(analyser.fftSize);
         microphone.connect(analyser);
+        
         isMicrophoneActive = true;
+        const statusEl = document.getElementById('mic-status');
+        if (statusEl) { statusEl.innerText = "MICRO: ON"; statusEl.style.color = "lime"; }
+        
         loop();
-    } catch (e) { alert("Micro non activé. Jouez au tactile !"); }
+    } catch (e) {
+        alert("Microphone refusé. Jouez en touchant l'écran !");
+    }
 }
 
 function loop() {
@@ -60,18 +56,41 @@ function getPitch(buf, sr) {
     return sr/maxp;
 }
 
-// --- 4. INTERFACE ET JEU ---
+// --- 3. GESTION DU PLEIN ÉCRAN ---
+const fsBtn = document.getElementById('fullscreen-btn');
+fsBtn.onclick = () => {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        fsBtn.innerText = "✖ Fermer";
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        fsBtn.innerText = "📺 Plein Écran";
+    }
+};
+
+// --- 4. LOGIQUE DE JEU ---
 function switchTab(tab) {
     const grid = document.getElementById('content-grid');
-    if (!grid) return;
     grid.innerHTML = '';
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase() === tab));
-    let list = (tab === 'cours') ? data_cours : data_musiques;
-    let mode = (tab === 'morceaux') ? 'flow' : 'step';
+    
+    const cours = [
+        { titre: "Do Central (MD)", notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'E4',f:3}] },
+        { titre: "Gamme de Do", notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'E4',f:3},{note:'F4',f:1},{note:'G4',f:2},{note:'A4',f:3},{note:'B4',f:4},{note:'C5',f:5}] }
+    ];
+    const morceaux = [
+        { titre: "Pirates", notes: [{note:'A3'},{note:'C4'},{note:'D4'},{note:'D4'},{note:'E4'}] },
+        { titre: "Tattoo", notes: [{note:'A3'},{note:'C4'},{note:'D4'},{note:'E4'},{note:'D4'}]}
+    ];
+
+    let list = (tab === 'cours') ? cours : morceaux;
     list.forEach(item => {
         let c = document.createElement('div'); c.className='card';
-        c.innerHTML=`<div class="badge badge-${item.diff}">${item.diff}</div><h3>${item.titre}</h3>`;
-        c.onclick = () => { setupMicrophone(); startGame(item, mode); };
+        c.innerHTML=`<h3>${item.titre}</h3>`;
+        c.onclick = async () => { await setupMicrophone(); startGame(item, tab === 'cours' ? 'step' : 'flow'); };
         grid.appendChild(c);
     });
 }
@@ -80,14 +99,9 @@ function startGame(data, mode) {
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
     currentScore = 0; notesOnScreen = []; isPaused = false; currentMode = mode;
-    document.getElementById('live-score').textContent = "0000";
     let i = 0;
-    const interval = setInterval(() => {
-        if (i >= data.notes.length) { 
-            clearInterval(interval); 
-            setTimeout(() => { confetti(); setTimeout(quitGame, 3000); }, 2000);
-            return;
-        }
+    const timer = setInterval(() => {
+        if (i >= data.notes.length) { clearInterval(timer); return; }
         if (!isPaused || currentMode === 'flow') { drop(data.notes[i]); i++; }
     }, 2000);
 }
@@ -97,14 +111,14 @@ function drop(nData) {
     const o = { ...nData, y: -80, ok: false, id: id };
     notesOnScreen.push(o);
     const el = document.createElement('div');
-    el.className = `falling-note ${o.h === 'left' ? 'left-hand' : ''}`;
+    el.className = 'falling-note';
     el.id = "note-" + id;
-    el.innerHTML = `${o.f || ''}`;
+    el.innerHTML = nData.f || '';
     const keyEl = document.querySelector(`.key[data-note="${o.note}"]`);
     if(keyEl) el.style.left = keyEl.offsetLeft + "px";
     document.getElementById('fall-zone').appendChild(el);
     function animate() {
-        if(currentMode === 'step' && !o.ok && o.y > 300) { isPaused = true; el.classList.add('waiting'); }
+        if(currentMode === 'step' && !o.ok && o.y > 350) { isPaused = true; el.classList.add('waiting'); }
         if(!isPaused || currentMode === 'flow') o.y += 3;
         el.style.top = o.y + "px";
         if(o.y < 600) requestAnimationFrame(animate); else el.remove();
@@ -126,13 +140,13 @@ function handleKeyPress(note, fromMicro = false) {
 // --- 5. INITIALISATION DU PIANO ---
 const piano = document.getElementById('piano');
 const pattern = [{n:'C', b:false}, {n:'C#', b:true}, {n:'D', b:false}, {n:'D#', b:true}, {n:'E', b:false}, {n:'F', b:false}, {n:'F#', b:true}, {n:'G', b:false}, {n:'G#', b:true}, {n:'A', b:false}, {n:'A#', b:true}, {n:'B', b:false}];
-[2,3,4,5,6].forEach(oct => {
+[3,4,5].forEach(oct => {
     pattern.forEach(p => {
         const id = p.n + oct;
         const k = document.createElement('div');
         k.className = `key ${p.b ? 'black' : ''}`;
         k.dataset.note = id;
-        k.onpointerdown = () => handleKeyPress(id);
+        k.onpointerdown = (e) => { e.preventDefault(); handleKeyPress(id); };
         piano.appendChild(k);
     });
 });
