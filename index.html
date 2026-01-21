@@ -3,33 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PianoKid Evo - Mobile</title>
+    <title>PianoKid Evo - Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
     <div id="main-menu">
-        <h1>🎹 PianoKid Evo</h1>
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('cours')">Cours</button>
-            <button class="tab-btn" onclick="switchTab('morceaux')">Musiques</button>
+        <h1 style="color: #f1c40f;">🎹 PianoKid Evo</h1>
+        <div style="margin-bottom: 20px;">
+            <button class="tab-btn active" onclick="switchTab('cours')">COURS</button>
+            <button class="tab-btn" onclick="switchTab('morceaux')">MUSIQUES</button>
         </div>
         <div id="content-grid"></div>
     </div>
 
     <div id="game-container" style="display: none;">
-        <div id="game-header">
-            <button onclick="quitGame()" class="exit-btn">⬅ Retour</button>
+        <div id="nav-bar">
+            <button id="btn-retour" class="btn-pro red">⬅ RETOUR</button>
             <div id="live-score">0000</div>
-            <button id="fullscreen-btn">📺 Plein Écran</button>
+            <button id="btn-fullscreen" class="btn-pro blue">📺 PLEIN ÉCRAN</button>
         </div>
-        <div id="mic-status">MICRO: OFF</div>
+        
+        <div id="mic-label">MICRO: OFF</div>
+        
         <div id="fall-zone"></div>
-    </div>
 
-    <div id="piano-container">
-        <div id="piano"></div>
+        <div id="piano-area">
+            <div id="piano"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>
