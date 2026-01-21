@@ -1,148 +1,187 @@
-// 1. CONFIGURATION
-const noteFreqs = {
-    'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
-    'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
-    'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00, 'B5': 987.77
+const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', 'A': 'LA', 'B': 'SI' };
+const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+let audioContext, analyser, microphone, dataArray = new Float32Array(2048);
+let isMicrophoneActive = false;
+let notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
+let currentTab = 'cours';
+
+const DATA = {
+    cours: [
+        { titre: "1. Main Droite : DO-SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:800}] },
+        { titre: "2. Main Gauche : DO-SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:800}] },
+        { titre: "3. La Gamme Complète", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] },
+        { titre: "4. Accords de Base", diff: 'hard', notes: [{note:'C3',isAccord:true, d:0},{note:'E3',isAccord:true, d:0},{note:'G3',isAccord:true, d:1500}] }
+    ],
+    apprentissage: [
+        { titre: "Exercice de Force", diff: 'hard', notes: [{note:'A2', d:400},{note:'G2', d:400},{note:'A2', d:400},{note:'G2', d:400}] },
+        { titre: "Sauts d'octaves", diff: 'medium', notes: [{note:'C3', d:700},{note:'C4', d:700},{note:'C3', d:700}] }
+    ],
+    morceaux: [
+        { titre: "Nothing Else Matters", diff: 'medium', notes: [{note:'E2', d:500},{note:'G3', d:500},{note:'B3', d:800},{note:'E4', d:500},{note:'B3', d:500},{note:'G3', d:1200}] },
+        { titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000},{note:'D4', d:1000}] }
+    ]
 };
 
-let audioCtx, analyser, dataArray, isMicOn = false;
-let notesOnScreen = [], score = 0, isPaused = false, gameMode = 'step', gameTimer;
-
-// 2. BOUTONS (RETOUR & PLEIN ÉCRAN)
-document.getElementById('btn-retour').onclick = function(e) {
-    e.preventDefault();
-    quitGame();
-};
-
-document.getElementById('btn-fullscreen').onclick = function(e) {
-    e.preventDefault();
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-        else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
-        this.innerText = "✖ FERMER";
-    } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        this.innerText = "📺 PLEIN ÉCRAN";
-    }
-};
-
-// 3. MICROPHONE
-async function startMic() {
-    if (isMicOn) return;
-    try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const source = audioCtx.createMediaStreamSource(stream);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 2048;
-        dataArray = new Float32Array(analyser.fftSize);
-        source.connect(analyser);
-        isMicOn = true;
-        document.getElementById('mic-label').innerText = "MICRO: ON";
-        document.getElementById('mic-label').style.color = "#55efc4";
-        micLoop();
-    } catch (err) { console.log("Micro refusé"); }
+// --- SON ---
+function playTone(note) {
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const name = note.slice(0, -1);
+    const octave = parseInt(note.slice(-1));
+    const freq = 440 * Math.pow(2, (noteStrings.indexOf(name) + (octave - 4) * 12) / 12);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.start(); osc.stop(audioContext.currentTime + 0.8);
 }
 
-function micLoop() {
-    analyser.getFloatTimeDomainData(dataArray);
-    let freq = autoCorrelate(dataArray, audioCtx.sampleRate);
-    if (freq !== -1) {
-        for (let note in noteFreqs) {
-            if (Math.abs(freq - noteFreqs[note]) < (noteFreqs[note] * 0.03)) handleKey(note);
-        }
-    }
-    requestAnimationFrame(micLoop);
-}
+// --- PIANO ---
+const piano = document.getElementById('piano');
+[2, 3, 4, 5, 6].forEach(oct => {
+    noteStrings.forEach(n => {
+        const isBlack = n.includes('#');
+        const key = document.createElement('div');
+        key.className = `key ${isBlack ? 'black' : ''}`;
+        key.dataset.note = n + oct;
+        if(!isBlack) key.textContent = noteNamesFR[n] || n;
+        key.onmousedown = (e) => { e.preventDefault(); handleKeyPress(n + oct); };
+        key.ontouchstart = (e) => { e.preventDefault(); handleKeyPress(n + oct); };
+        piano.appendChild(key);
+    });
+});
 
-function autoCorrelate(buf, sr) {
-    let rms = 0; for (let v of buf) rms += v*v;
-    if (Math.sqrt(rms/buf.length) < 0.01) return -1;
-    let c = new Float32Array(buf.length);
-    for (let i=0; i<buf.length; i++) for (let j=0; j<buf.length-i; j++) c[i] += buf[j]*buf[j+i];
-    let d=0; while (c[d]>c[d+1]) d++;
-    let maxv=-1, maxp=-1;
-    for (let i=d; i<buf.length; i++) if (c[i]>maxv) { maxv=c[i]; maxp=i; }
-    return sr/maxp;
-}
-
-// 4. JEU
 function switchTab(tab) {
+    currentTab = tab;
     const grid = document.getElementById('content-grid');
     grid.innerHTML = '';
-    const items = (tab === 'cours') ? 
-        [{t:"Cours 1 : Do-Ré-Mi", n:[{note:'C4'},{note:'D4'},{note:'E4'}]}] : 
-        [{t:"Pirates des Caraïbes", n:[{note:'A3'},{note:'C4'},{note:'D4'}]}];
-    
-    items.forEach(item => {
-        let card = document.createElement('div'); card.className='card';
-        card.innerHTML=`<h3>${item.t}</h3>`;
-        card.onclick = async () => { await startMic(); startGame(item, tab==='cours'?'step':'flow'); };
-        grid.appendChild(card);
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase().includes(tab.slice(0,3))));
+    DATA[tab].forEach(item => {
+        const c = document.createElement('div');
+        c.className = 'card';
+        c.innerHTML = `<div class="badge badge-${item.diff}">${item.diff}</div><div>${item.titre}</div>`;
+        c.onclick = () => startGame(item, (tab === 'morceaux' ? 'flow' : 'step'));
+        grid.appendChild(c);
     });
 }
 
+// --- JEU ---
 function startGame(data, mode) {
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
-    score = 0; notesOnScreen = []; isPaused = false; gameMode = mode;
+    notesValidated = 0; totalNotesInLevel = data.notes.length;
+    notesOnScreen = []; isPaused = false; currentMode = mode;
+    updateProgress();
+    
     let i = 0;
-    gameTimer = setInterval(() => {
-        if (i >= data.n.length) { clearInterval(gameTimer); return; }
-        if (!isPaused || gameMode === 'flow') { dropNote(data.n[i]); i++; }
-    }, 2000);
+    function next() {
+        if(i < data.notes.length && document.getElementById('game-container').style.display !== 'none') {
+            const n = data.notes[i];
+            if(currentTab === 'morceaux') playTone(n.note);
+            drop(n);
+            i++;
+            setTimeout(next, n.d || 1500);
+        }
+    }
+    next();
 }
 
-function dropNote(nData) {
+function drop(nData) {
     const id = Math.random();
-    const o = { ...nData, y: -50, ok: false, id: id };
+    const o = { ...nData, y: -100, ok: false, id: id, h: 60 };
     notesOnScreen.push(o);
     const el = document.createElement('div');
+    el.className = 'falling-note';
     el.id = "note-" + id;
-    el.style.cssText = `position:absolute; width:30px; height:30px; background:#0984e3; border-radius:50%; top:-50px;`;
-    const key = document.querySelector(`.key[data-note="${o.note}"]`);
-    if(key) el.style.left = (key.offsetLeft + key.offsetWidth/2 - 15) + "px";
+    el.style.height = o.h + "px";
+    const keyEl = document.querySelector(`.key[data-note="${o.note}"]`);
+    if(keyEl) el.style.left = keyEl.offsetLeft + "px";
     document.getElementById('fall-zone').appendChild(el);
-    function move() {
-        if(gameMode === 'step' && !o.ok && o.y > 250) isPaused = true;
-        if(!isPaused || gameMode === 'flow') o.y += 3;
+
+    function step() {
+        const stopPos = window.innerHeight - 140 - o.h;
+        if(currentMode === 'step' && !o.ok && o.y >= stopPos) { isPaused = true; el.classList.add('waiting'); o.y = stopPos; }
+        if(!isPaused || currentMode === 'flow') o.y += 3;
+        
+        const scrollX = document.getElementById('piano-container').scrollLeft;
+        el.style.transform = `translateX(${-scrollX}px)`;
         el.style.top = o.y + "px";
-        if(o.y < 500 && document.getElementById("note-"+id)) requestAnimationFrame(move); else el.remove();
+
+        if(o.y < window.innerHeight && document.getElementById('game-container').style.display !== 'none') requestAnimationFrame(step);
+        else el.remove();
     }
-    move();
+    step();
 }
 
-function handleKey(note) {
-    const key = document.querySelector(`.key[data-note="${note}"]`);
-    if(key) { key.classList.add('active'); setTimeout(()=>key.classList.remove('active'), 150); }
+function handleKeyPress(note) {
+    const keyEl = document.querySelector(`.key[data-note="${note}"]`);
+    if(keyEl) { keyEl.classList.add('active'); setTimeout(() => keyEl.classList.remove('active'), 200); }
     const target = notesOnScreen.find(n => n.note === note && !n.ok);
     if(target) {
-        target.ok = true; isPaused = false; score += 100;
-        document.getElementById('live-score').textContent = score.toString().padStart(4, '0');
-        const v = document.getElementById("note-" + target.id);
-        if(v) v.remove();
+        target.ok = true; notesValidated++; updateProgress();
+        const noteEl = document.getElementById("note-" + target.id);
+        if(noteEl) noteEl.classList.add('hit');
+        if(!notesOnScreen.some(n => !n.ok && n.y >= (window.innerHeight - 200))) isPaused = false;
+        if(notesValidated === totalNotesInLevel) setTimeout(quitGame, 1000);
     }
 }
 
-function quitGame() {
-    clearInterval(gameTimer);
-    document.getElementById('game-container').style.display = 'none';
-    document.getElementById('main-menu').style.display = 'flex';
-    document.getElementById('fall-zone').innerHTML = '';
+function updateProgress() { document.getElementById('progress-inner').style.width = (notesValidated/totalNotesInLevel)*100 + "%"; }
+function quitGame() { document.getElementById('main-menu').style.display = 'flex'; document.getElementById('game-container').style.display = 'none'; document.getElementById('fall-zone').innerHTML = ''; }
+
+// --- MICRO ---
+async function initMicrophone() {
+    try {
+        if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        microphone = audioContext.createMediaStreamSource(stream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        microphone.connect(analyser);
+        isMicrophoneActive = true;
+        document.getElementById('status-text').textContent = "🎤 Micro ON";
+        detectPitch();
+    } catch (err) { alert("Microphone refusé."); }
 }
 
-// 5. CRÉER LE PIANO
-const p = document.getElementById('piano');
-const keys = [{n:'C',b:0},{n:'C#',b:1},{n:'D',b:0},{n:'D#',b:1},{n:'E',b:0},{n:'F',b:0},{n:'F#',b:1},{n:'G',b:0},{n:'G#',b:1},{n:'A',b:0},{n:'A#',b:1},{n:'B',b:0}];
-[3,4,5].forEach(oct => {
-    keys.forEach(k => {
-        const div = document.createElement('div');
-        div.className = `key ${k.b?'black':''}`;
-        div.dataset.note = k.n + oct;
-        div.onpointerdown = (e) => { e.preventDefault(); handleKey(k.n + oct); };
-        p.appendChild(div);
-    });
-});
+function detectPitch() {
+    if (!isMicrophoneActive) return;
+    analyser.getFloatTimeDomainData(dataArray);
+    const volume = Math.sqrt(dataArray.reduce((acc, val) => acc + val * val, 0) / dataArray.length);
+    if (volume > 0.06) {
+        const freq = autoCorrelate(dataArray, audioContext.sampleRate);
+        if (freq !== -1) {
+            const noteNum = 12 * (Math.log(freq / 440) / Math.log(2));
+            const index = Math.round(noteNum) + 69;
+            const note = noteStrings[index % 12] + (Math.floor(index / 12) - 1);
+            document.getElementById('detected-note').textContent = note;
+            handleKeyPress(note);
+        }
+    }
+    requestAnimationFrame(detectPitch);
+}
+
+function autoCorrelate(buf, sampleRate) {
+    let SIZE = buf.length, rms = 0;
+    for (let i = 0; i < SIZE; i++) { let val = buf[i]; rms += val * val; }
+    if (Math.sqrt(rms / SIZE) < 0.01) return -1;
+    let c = new Array(SIZE).fill(0);
+    for (let i = 0; i < SIZE; i++)
+        for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
+    let d = 0; while (c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < SIZE; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
+    return sampleRate / maxpos;
+}
+
+function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; }
+function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+function createNewProfile() {
+    const name = document.getElementById('input-username').value;
+    if(name) { document.getElementById('display-username').textContent = name; closeProfileModal(); }
+}
 
 window.onload = () => switchTab('cours');
