@@ -2,35 +2,62 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PianoKid Evo - Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PianoKid Evo - GitHub Edition</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
     <div id="main-menu">
-        <h1 style="color: #f1c40f;">🎹 PianoKid Evo</h1>
-        <div style="margin-bottom: 20px;">
+        <div class="profile-bar">
+            <div class="user-info" onclick="openProfileModal()">
+                <div class="avatar" id="user-avatar">🎹</div>
+                <div>
+                    <div class="username" id="display-username">Apprenti</div>
+                    <div class="level-tag">Changer de profil</div>
+                </div>
+            </div>
+            <button id="mic-toggle" class="mic-btn-small" onclick="initMicrophone()">
+                <span id="status-text">🎤 Micro OFF</span>
+            </button>
+        </div>
+
+        <div class="logo">PianoKid Evo</div>
+        
+        <div class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('cours')">COURS</button>
+            <button class="tab-btn" onclick="switchTab('apprentissage')">EXERCICES</button>
             <button class="tab-btn" onclick="switchTab('morceaux')">MUSIQUES</button>
         </div>
-        <div id="content-grid"></div>
+
+        <div id="content-grid" class="grid"></div>
     </div>
 
-    <div id="game-container" style="display: none;">
-        <div id="nav-bar">
-            <button id="btn-retour" class="btn-pro red">⬅ RETOUR</button>
-            <div id="live-score">0000</div>
-            <button id="btn-fullscreen" class="btn-pro blue">📺 PLEIN ÉCRAN</button>
+    <div id="game-container" style="display:none;">
+        <div id="progress-container">
+            <div id="progress-inner"></div>
         </div>
-        
-        <div id="mic-label">MICRO: OFF</div>
+
+        <div id="live-score">0000</div>
+        <div id="detected-note">--</div>
+        <button class="btn-close" onclick="quitGame()">❌</button>
         
         <div id="fall-zone"></div>
-
-        <div id="piano-area">
+        <div id="collision-line"></div>
+        
+        <div id="piano-container">
             <div id="piano"></div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <h2>Mes Profils</h2>
+            <div id="profiles-list"></div>
+            <hr>
+            <input type="text" id="input-username" placeholder="Prénom de l'enfant">
+            <button onclick="createNewProfile()" class="btn-add">CRÉER</button>
+            <button onclick="closeProfileModal()" class="btn-secondary">FERMER</button>
         </div>
     </div>
 
