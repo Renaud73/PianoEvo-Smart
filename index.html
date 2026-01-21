@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PianoKid Evo - Global</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="main-menu">
+    <div class="logo">PianoKid Evo</div>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('cours')">COURS</button>
+      <button class="tab-btn" onclick="switchTab('apprentissage')">APPRENTISSAGE</button>
+      <button class="tab-btn" onclick="switchTab('morceaux')">MORCEAUX</button>
+    </div>
+    <div id="content-grid" class="grid"></div>
+  </div>
+
+  <div id="game-container">
+    <div id="live-score">0000</div>
+    <button class="btn btn-close" onclick="quitGame()">❌ QUITTER</button>
+    <div id="fall-zone"></div>
+    <div id="piano-container"><div id="piano"></div></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
