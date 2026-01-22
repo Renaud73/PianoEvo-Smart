@@ -3,31 +3,20 @@ const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', '
 let audioContext, analyser, microphone, dataArray = new Float32Array(2048);
 let notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
 
-let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || [];
+let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || ["Apprenti"];
 let currentProfile = localStorage.getItem('pk_current') || "Apprenti";
 
 const DATA = {
     cours: [
-        { titre: "1. Main Droite : DO à SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:1200}] },
-        { titre: "2. Main Gauche : DO à SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:1200}] },
-        { titre: "3. La Gamme Majeure (MG)", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] },
-        { titre: "4. Accords de Base", diff: 'hard', notes: [{note:'C3', d:0},{note:'E3', d:0},{note:'G3', d:1500}, {note:'F2', d:0},{note:'A2', d:0},{note:'C3', d:1500}] }
+        { titre: "1. Main Droite : DO-SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:1200}] },
+        { titre: "2. Main Gauche : DO-SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:1200}] },
+        { titre: "3. La Gamme Majeure", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] }
     ],
-    apprentissage: [
-        { titre: "Muscles : 4e/5e doigt", diff: 'hard', notes: [{note:'A2', d:400},{note:'G2', d:400},{note:'A2', d:400},{note:'G2', d:400},{note:'F2', d:800}] },
-        { titre: "Vitesse : DO-SOL", diff: 'hard', notes: [{note:'C4', d:200},{note:'D4', d:200},{note:'E4', d:200},{note:'F4', d:200},{note:'G4', d:800}] }
-    ],
-    morceaux: [
-        { titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000},{note:'D4', d:1000},{note:'C4', d:1000}] },
-        { titre: "Nothing Else Matters", diff: 'medium', notes: [{note:'E2', d:500},{note:'G3', d:500},{note:'B3', d:500},{note:'E4', d:1000}] }
-    ]
+    apprentissage: [{ titre: "Vitesse 4e/5e doigt", diff: 'hard', notes: [{note:'A2', d:400},{note:'G2', d:400},{note:'A2', d:400},{note:'G2', d:400},{note:'F2', d:800}] }],
+    morceaux: [{ titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000}] }]
 };
 
-window.onload = () => {
-    initPiano();
-    updateProfileDisplay();
-    switchTab('cours');
-};
+window.onload = () => { initPiano(); updateProfileDisplay(); switchTab('cours'); };
 
 function initPiano() {
     const p = document.getElementById('piano');
@@ -38,35 +27,11 @@ function initPiano() {
             key.className = `key ${isBlack ? 'black' : ''}`;
             key.dataset.note = n + oct;
             if(!isBlack) key.textContent = noteNamesFR[n] || n;
-            key.onclick = () => handleKeyPress(n + oct);
+            key.onmousedown = () => handleKeyPress(n + oct);
             key.ontouchstart = (e) => { e.preventDefault(); handleKeyPress(n + oct); };
             p.appendChild(key);
         });
     });
-}
-
-function updateProfileDisplay() {
-    const list = document.getElementById('profiles-list');
-    list.innerHTML = '';
-    profiles.forEach(name => {
-        const item = document.createElement('div');
-        item.className = 'profile-item';
-        item.innerHTML = `<span>👤 ${name}</span> ${name === currentProfile ? '✅' : ''}`;
-        item.onclick = () => { currentProfile = name; localStorage.setItem('pk_current', name); updateProfileDisplay(); closeProfileModal(); };
-        list.appendChild(item);
-    });
-    document.getElementById('display-username').textContent = currentProfile;
-}
-
-function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; updateProfileDisplay(); }
-function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
-function createNewProfile() {
-    const val = document.getElementById('input-username').value.trim();
-    if(val && !profiles.includes(val)) {
-        profiles.push(val); localStorage.setItem('pk_profiles', JSON.stringify(profiles));
-        currentProfile = val; localStorage.setItem('pk_current', val);
-        document.getElementById('input-username').value = ''; updateProfileDisplay(); closeProfileModal();
-    }
 }
 
 function switchTab(t) {
@@ -82,63 +47,48 @@ function switchTab(t) {
     });
 }
 
-function toggleFullScreen() {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
-}
-
 function startGame(data, mode) {
     document.getElementById('main-menu').style.display = 'none';
-    document.getElementById('game-container').style.display = 'block';
+    document.getElementById('game-container').style.display = 'flex';
     notesValidated = 0; totalNotesInLevel = data.notes.length; notesOnScreen = []; isPaused = false; currentMode = mode;
     updateProgress();
     let i = 0;
-    function next() {
+    const next = () => {
         if(i < data.notes.length && document.getElementById('game-container').style.display !== 'none') {
             drop(data.notes[i]); i++;
             setTimeout(next, data.notes[i-1].d || 1500);
         }
-    }
+    };
     next();
 }
 
 function drop(nData) {
     const id = Math.random();
-    const o = { ...nData, y: -200, ok: false, id: id, h: 60 };
+    const o = { ...nData, y: -100, ok: false, id: id, h: 60 };
     notesOnScreen.push(o);
-    
     const k = document.querySelector(`.key[data-note="${o.note}"]`);
-    if(!k) return;
-
+    const fallZone = document.getElementById('fall-zone');
     const el = document.createElement('div');
     el.className = 'falling-note'; el.id = "n-" + id; el.style.height = o.h + "px";
-    document.getElementById('game-layout').appendChild(el);
+    fallZone.appendChild(el);
 
     function animate() {
         if(document.getElementById('game-container').style.display === 'none') { el.remove(); return; }
-
-        const pianoContainer = document.getElementById('piano-container');
-        const pianoRect = pianoContainer.getBoundingClientRect();
-        const keyRect = k.getBoundingClientRect();
-
-        // Aligne la note sur la touche en temps réel
-        el.style.left = keyRect.left + "px";
-        el.style.width = keyRect.width + "px";
-
-        if(!isPaused) o.y += 4; // Vitesse de chute
-
-        const limit = pianoRect.top - o.h;
-
-        if(currentMode === 'step' && !o.ok && o.y >= limit) { 
-            isPaused = true; el.classList.add('waiting'); o.y = limit; 
-            // Centre le piano sur la touche
-            const scrollTarget = k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2);
-            pianoContainer.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+        const kRect = k.getBoundingClientRect();
+        const zRect = fallZone.getBoundingClientRect();
+        el.style.left = (kRect.left - zRect.left) + "px";
+        el.style.width = kRect.width + "px";
+        if(!isPaused) o.y += 5;
+        const limit = zRect.height;
+        if(currentMode === 'step' && !o.ok && (o.y + o.h) >= limit) {
+            isPaused = true; o.y = limit - o.h; el.classList.add('waiting');
+            document.getElementById('piano-container').scrollTo({ 
+                left: k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2), 
+                behavior: 'smooth' 
+            });
         }
-        
         el.style.top = o.y + "px";
-        
-        if(o.y < window.innerHeight) requestAnimationFrame(animate); 
+        if(o.y < zRect.height + 50) requestAnimationFrame(animate); 
         else { el.remove(); notesOnScreen = notesOnScreen.filter(n => n.id !== id); }
     }
     animate();
@@ -146,29 +96,50 @@ function drop(nData) {
 
 function handleKeyPress(note) {
     const k = document.querySelector(`.key[data-note="${note}"]`);
-    if(k) { k.classList.add('active'); setTimeout(() => k.classList.remove('active'), 200); }
+    if(k) { k.classList.add('active'); setTimeout(() => k.classList.remove('active'), 150); }
     const t = notesOnScreen.find(n => n.note === note && !n.ok);
     if(t) {
         t.ok = true; notesValidated++; updateProgress();
         const el = document.getElementById("n-" + t.id);
-        if(el) el.classList.add('hit');
+        if(el) { el.remove(); }
         isPaused = false;
         if(notesValidated === totalNotesInLevel) setTimeout(quitGame, 1000);
     }
 }
 
 function updateProgress() { document.getElementById('progress-inner').style.width = (notesValidated/totalNotesInLevel)*100 + "%"; }
-function quitGame() { document.getElementById('main-menu').style.display = 'block'; document.getElementById('game-container').style.display = 'none'; }
+function quitGame() { document.getElementById('main-menu').style.display = 'block'; document.getElementById('game-container').style.display = 'none'; document.getElementById('fall-zone').innerHTML = ''; }
+function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; updateProfileDisplay(); }
+function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+
+function updateProfileDisplay() {
+    const list = document.getElementById('profiles-list'); list.innerHTML = '';
+    profiles.forEach(name => {
+        const item = document.createElement('div'); item.className = 'profile-item';
+        item.innerHTML = `<span>👤 ${name}</span> ${name === currentProfile ? '✅' : ''}`;
+        item.onclick = () => { currentProfile = name; localStorage.setItem('pk_current', name); updateProfileDisplay(); closeProfileModal(); };
+        list.appendChild(item);
+    });
+    document.getElementById('display-username').textContent = currentProfile;
+}
+
+function createNewProfile() {
+    const val = document.getElementById('input-username').value.trim();
+    if(val && !profiles.includes(val)) {
+        profiles.push(val); localStorage.setItem('pk_profiles', JSON.stringify(profiles));
+        currentProfile = val; localStorage.setItem('pk_current', val);
+        document.getElementById('input-username').value = ''; updateProfileDisplay(); closeProfileModal();
+    }
+}
 
 async function initMicrophone() {
     try {
         if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const s = await navigator.mediaDevices.getUserMedia({ audio: true });
         microphone = audioContext.createMediaStreamSource(s);
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 2048;
-        microphone.connect(analyser);
-        document.getElementById('mic-toggle').textContent = "🎤 Micro ON";
+        analyser = audioContext.createAnalyser(); analyser.fftSize = 2048;
+        microphone.connect(analyser); document.getElementById('mic-toggle').textContent = "🎤 Micro ON";
         detect();
     } catch (e) { alert("Micro requis."); }
 }
