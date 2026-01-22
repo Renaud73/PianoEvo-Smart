@@ -32,9 +32,14 @@
         <div id="progress-container"><div id="progress-inner"></div></div>
         <div id="detected-note">--</div>
         <button class="btn-close" onclick="quitGame()">❌ QUITTER</button>
-        <div id="fall-zone"></div>
-        <div id="collision-line"></div>
-        <div id="piano-container"><div id="piano"></div></div>
+        
+        <div id="game-layout">
+            <div id="fall-zone"></div>
+            <div id="collision-line"></div>
+            <div id="piano-container">
+                <div id="piano"></div>
+            </div>
+        </div>
     </div>
 
     <div id="profile-modal" class="modal">
@@ -43,9 +48,9 @@
             <div id="profiles-list"></div>
             <div class="add-profile-box">
                 <input type="text" id="input-username" placeholder="Prénom">
-                <button onclick="createNewProfile()" class="btn-add">AJOUTER</button>
+                <button onclick="createNewProfile()" class="btn-add">OK</button>
             </div>
-            <button onclick="closeProfileModal()" class="btn-secondary">FERMER</button>
+            <button onclick="closeProfileModal()" class="btn-secondary">RETOUR</button>
         </div>
     </div>
 
