@@ -3,7 +3,6 @@ const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', '
 let audioContext, analyser, microphone, dataArray = new Float32Array(2048);
 let notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
 
-// SAUVEGARDE PROFILS
 let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || [];
 let currentProfile = localStorage.getItem('pk_current') || "Apprenti";
 
@@ -11,22 +10,16 @@ const DATA = {
     cours: [
         { titre: "1. Main Droite : DO à SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:1200}] },
         { titre: "2. Main Gauche : DO à SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:1200}] },
-        { titre: "3. La Gamme de DO (MG)", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] },
-        { titre: "4. Coordination : Alternance", diff: 'medium', notes: [{note:'C4', d:600},{note:'C3', d:600},{note:'E4', d:600},{note:'E3', d:600},{note:'G4', d:600},{note:'G3', d:1000}] },
-        { titre: "5. Les Accords de Base (MG)", diff: 'hard', notes: [{note:'C3', d:0},{note:'E3', d:0},{note:'G3', d:1500}, {note:'F2', d:0},{note:'A2', d:0},{note:'C3', d:1500}] },
-        { titre: "6. Arpège DO Majeur", diff: 'medium', notes: [{note:'C3', d:400},{note:'E3', d:400},{note:'G3', d:400},{note:'C4', d:1000}] }
+        { titre: "3. La Gamme Majeure (MG)", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] },
+        { titre: "4. Accords de Base", diff: 'hard', notes: [{note:'C3', d:0},{note:'E3', d:0},{note:'G3', d:1500}, {note:'F2', d:0},{note:'A2', d:0},{note:'C3', d:1500}] }
     ],
     apprentissage: [
-        { titre: "Muscles : 4e et 5e doigt", diff: 'hard', notes: [{note:'A2', d:400},{note:'G2', d:400},{note:'A2', d:400},{note:'G2', d:400},{note:'F2', d:400},{note:'G2', d:800}] },
-        { titre: "Indépendance : Les Sauts", diff: 'medium', notes: [{note:'C3', d:700},{note:'G2', d:700},{note:'C3', d:700},{note:'E2', d:700},{note:'C3', d:1000}] },
-        { titre: "Vitesse : DO-SOL-DO", diff: 'hard', notes: [{note:'C4', d:200},{note:'D4', d:200},{note:'E4', d:200},{note:'F4', d:200},{note:'G4', d:200},{note:'F4', d:200},{note:'E4', d:200},{note:'D4', d:200},{note:'C4', d:800}] },
-        { titre: "Écartement : DO-LA", diff: 'medium', notes: [{note:'C3', d:600},{note:'A3', d:600},{note:'C3', d:600},{note:'A3', d:1000}] }
+        { titre: "Muscles : 4e/5e doigt", diff: 'hard', notes: [{note:'A2', d:400},{note:'G2', d:400},{note:'A2', d:400},{note:'G2', d:400},{note:'F2', d:800}] },
+        { titre: "Vitesse : DO-SOL", diff: 'hard', notes: [{note:'C4', d:200},{note:'D4', d:200},{note:'E4', d:200},{note:'F4', d:200},{note:'G4', d:800}] }
     ],
     morceaux: [
-        { titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000},{note:'D4', d:1000},{note:'C4', d:600},{note:'E4', d:600},{note:'D4', d:600},{note:'D4', d:600},{note:'C4', d:1200}] },
-        { titre: "Nothing Else Matters", diff: 'medium', notes: [{note:'E2', d:500},{note:'G3', d:500},{note:'B3', d:500},{note:'E4', d:800},{note:'B3', d:500},{note:'G3', d:500},{note:'E2', d:1000}] },
-        { titre: "Bailando - Refrain", diff: 'medium', notes: [{note:'B3', d:400},{note:'B3', d:400},{note:'B3', d:400},{note:'A3', d:400},{note:'G3', d:800},{note:'A3', d:800},{note:'A3', d:400},{note:'A3', d:400},{note:'A3', d:400},{note:'G3', d:400},{note:'F3', d:1000}] },
-        { titre: "Frère Jacques", diff: 'easy', notes: [{note:'C4', d:500},{note:'D4', d:500},{note:'E4', d:500},{note:'C4', d:500},{note:'C4', d:500},{note:'D4', d:500},{note:'E4', d:500},{note:'C4', d:500}] }
+        { titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000},{note:'D4', d:1000},{note:'C4', d:1000}] },
+        { titre: "Nothing Else Matters", diff: 'medium', notes: [{note:'E2', d:500},{note:'G3', d:500},{note:'B3', d:500},{note:'E4', d:1000}] }
     ]
 };
 
@@ -52,10 +45,6 @@ function initPiano() {
     });
 }
 
-// --- LOGIQUE PROFIL ---
-function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; updateProfileDisplay(); }
-function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
-
 function updateProfileDisplay() {
     const list = document.getElementById('profiles-list');
     list.innerHTML = '';
@@ -69,45 +58,25 @@ function updateProfileDisplay() {
     document.getElementById('display-username').textContent = currentProfile;
 }
 
+function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; updateProfileDisplay(); }
+function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
 function createNewProfile() {
     const val = document.getElementById('input-username').value.trim();
     if(val && !profiles.includes(val)) {
-        profiles.push(val);
-        localStorage.setItem('pk_profiles', JSON.stringify(profiles));
-        currentProfile = val;
-        localStorage.setItem('pk_current', val);
-        document.getElementById('input-username').value = '';
-        updateProfileDisplay();
-        closeProfileModal();
+        profiles.push(val); localStorage.setItem('pk_profiles', JSON.stringify(profiles));
+        currentProfile = val; localStorage.setItem('pk_current', val);
+        document.getElementById('input-username').value = ''; updateProfileDisplay(); closeProfileModal();
     }
 }
 
 function switchTab(t) {
-    const g = document.getElementById('content-grid'); 
-    g.innerHTML = '';
-    
-    // Gestion de l'état actif des boutons du haut
-    document.querySelectorAll('.tab-btn').forEach(b => 
-        b.classList.toggle('active', b.textContent.toLowerCase().includes(t.substring(0,2)))
-    );
-
+    const g = document.getElementById('content-grid'); g.innerHTML = '';
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(t.substring(0,2))));
     DATA[t].forEach(item => {
-        // Détermination de la couleur en fonction de la difficulté
-        let color;
-        if (item.diff === 'easy') color = 'var(--easy)';
-        else if (item.diff === 'medium') color = 'var(--medium)';
-        else if (item.diff === 'hard') color = 'var(--hard)';
-        else color = 'var(--accent)';
-
+        let color = item.diff === 'easy' ? 'var(--easy)' : (item.diff === 'medium' ? 'var(--medium)' : 'var(--hard)');
         const c = document.createElement('div');
         c.className = 'card';
-        // Application de la couleur au texte du badge
-        c.innerHTML = `
-            <div class="badge" style="color:${color}; border: 1px solid ${color}; padding: 2px 5px; border-radius: 4px; font-size: 10px; margin-bottom: 10px; display: inline-block;">
-                ${item.diff.toUpperCase()}
-            </div>
-            <div style="font-weight: bold;">${item.titre}</div>
-        `;
+        c.innerHTML = `<div style="color:${color}; font-size:10px; font-weight:bold; margin-bottom:5px;">${item.diff.toUpperCase()}</div><div>${item.titre}</div>`;
         c.onclick = () => startGame(item, (t === 'morceaux' ? 'flow' : 'step'));
         g.appendChild(c);
     });
@@ -133,48 +102,33 @@ function startGame(data, mode) {
     next();
 }
 
-function drop(n) {
+function drop(nData) {
     const id = Math.random();
-    const o = { ...n, y: -100, ok: false, id: id, h: 60 };
+    const o = { ...nData, y: 0, ok: false, id: id, h: 60 };
     notesOnScreen.push(o);
-    
+    const k = document.querySelector(`.key[data-note="${o.note}"]`);
+    if(!k) return;
+
     const el = document.createElement('div');
     el.className = 'falling-note'; el.id = "n-" + id; el.style.height = o.h + "px";
-    
-    const k = document.querySelector(`.key[data-note="${o.note}"]`);
-    if(k) {
-        el.style.left = k.offsetLeft + "px";
-        
-        // AUTO-SCROLL : Le piano se déplace vers la note
-        const container = document.getElementById('piano-container');
-        const scrollTarget = k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2);
-        container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
-    }
-    
-    document.getElementById('fall-zone').appendChild(el);
+    k.appendChild(el);
+
+    const container = document.getElementById('piano-container');
+    const scrollTarget = k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2);
+    container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
 
     function animate() {
-        const pianoH = window.innerWidth > window.innerHeight ? 80 : 130;
-        const limit = window.innerHeight - pianoH - o.h;
+        if(document.getElementById('game-container').style.display === 'none') return;
+        const limit = window.innerHeight - (window.innerWidth > window.innerHeight ? 90 : 130);
         
-        if(currentMode === 'step' && !o.ok && o.y >= limit) { 
-            isPaused = true; 
-            el.classList.add('waiting'); 
-            o.y = limit; 
+        if(currentMode === 'step' && !o.ok && o.y >= limit - o.h) { 
+            isPaused = true; el.classList.add('waiting'); o.y = limit - o.h; 
         }
         
         if(!isPaused) o.y += 3;
+        el.style.transform = `translateY(${-o.y}px)`;
         
-        // On synchronise la position de la note avec le défilement du piano
-        const scrollX = document.getElementById('piano-container').scrollLeft;
-        el.style.transform = `translateX(${-scrollX}px)`;
-        el.style.top = o.y + "px";
-        
-        if(o.y < window.innerHeight && document.getElementById('game-container').style.display !== 'none') {
-            requestAnimationFrame(animate); 
-        } else {
-            el.remove();
-        }
+        if(o.y < window.innerHeight) requestAnimationFrame(animate); else el.remove();
     }
     animate();
 }
@@ -193,7 +147,7 @@ function handleKeyPress(note) {
 }
 
 function updateProgress() { document.getElementById('progress-inner').style.width = (notesValidated/totalNotesInLevel)*100 + "%"; }
-function quitGame() { document.getElementById('main-menu').style.display = 'block'; document.getElementById('game-container').style.display = 'none'; document.getElementById('fall-zone').innerHTML = ''; }
+function quitGame() { document.getElementById('main-menu').style.display = 'block'; document.getElementById('game-container').style.display = 'none'; }
 
 async function initMicrophone() {
     try {
@@ -205,7 +159,7 @@ async function initMicrophone() {
         microphone.connect(analyser);
         document.getElementById('mic-toggle').textContent = "🎤 Micro ON";
         detect();
-    } catch (e) { alert("Microphone requis pour jouer."); }
+    } catch (e) { alert("Micro requis."); }
 }
 
 function detect() {
