@@ -84,3 +84,22 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); co
     .key { width: 44px; }
     .key.black { width: 28px; margin-left: -14px; margin-right: -14px; }
 }
+/* --- EFFETS DE PARTICULES --- */
+#particle-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+}
+
+/* Amélioration de la lueur des notes */
+.falling-note {
+    box-shadow: 0 0 25px var(--accent), 0 0 10px #fff;
+}
+
+.key.active {
+    box-shadow: 0 0 40px var(--accent);
+}
