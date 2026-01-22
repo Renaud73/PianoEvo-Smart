@@ -9,8 +9,7 @@ let currentProfile = localStorage.getItem('pk_current') || "Apprenti";
 const DATA = {
     cours: [
         { titre: "1. Main Droite : DO-SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:1200}] },
-        { titre: "2. Main Gauche : DO-SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:1200}] },
-        { titre: "3. La Gamme Majeure", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] }
+        { titre: "2. Main Gauche : DO-SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:1200}] }
     ],
     apprentissage: [{ titre: "Vitesse 4e/5e doigt", diff: 'hard', notes: [{note:'A2', d:400},{note:'G2', d:400},{note:'A2', d:400},{note:'G2', d:400},{note:'F2', d:800}] }],
     morceaux: [{ titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000}] }]
@@ -76,16 +75,18 @@ function drop(nData) {
         if(document.getElementById('game-container').style.display === 'none') { el.remove(); return; }
         const kRect = k.getBoundingClientRect();
         const zRect = fallZone.getBoundingClientRect();
+        
         el.style.left = (kRect.left - zRect.left) + "px";
         el.style.width = kRect.width + "px";
+        
         if(!isPaused) o.y += 5;
         const limit = zRect.height;
+        
         if(currentMode === 'step' && !o.ok && (o.y + o.h) >= limit) {
             isPaused = true; o.y = limit - o.h; el.classList.add('waiting');
-            document.getElementById('piano-container').scrollTo({ 
-                left: k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2), 
-                behavior: 'smooth' 
-            });
+            const container = document.getElementById('piano-container');
+            const targetX = k.offsetLeft - (container.offsetWidth / 2) + (k.offsetWidth / 2);
+            container.scrollTo({ left: targetX, behavior: 'smooth' });
         }
         el.style.top = o.y + "px";
         if(o.y < zRect.height + 50) requestAnimationFrame(animate); 
