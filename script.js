@@ -137,18 +137,44 @@ function drop(n) {
     const id = Math.random();
     const o = { ...n, y: -100, ok: false, id: id, h: 60 };
     notesOnScreen.push(o);
+    
     const el = document.createElement('div');
     el.className = 'falling-note'; el.id = "n-" + id; el.style.height = o.h + "px";
+    
     const k = document.querySelector(`.key[data-note="${o.note}"]`);
-    if(k) el.style.left = k.offsetLeft + "px";
+    if(k) {
+        el.style.left = k.offsetLeft + "px";
+        
+        // AUTO-SCROLL : Le piano se déplace vers la note
+        const container = document.getElementById('piano-container');
+        const scrollTarget = k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2);
+        container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+    }
+    
     document.getElementById('fall-zone').appendChild(el);
 
     function animate() {
-        const limit = window.innerHeight - (window.innerWidth > window.innerHeight ? 100 : 130) - o.h;
-        if(currentMode === 'step' && !o.ok && o.y >= limit) { isPaused = true; el.classList.add('waiting'); o.y = limit; }
+        const pianoH = window.innerWidth > window.innerHeight ? 80 : 130;
+        const limit = window.innerHeight - pianoH - o.h;
+        
+        if(currentMode === 'step' && !o.ok && o.y >= limit) { 
+            isPaused = true; 
+            el.classList.add('waiting'); 
+            o.y = limit; 
+        }
+        
         if(!isPaused) o.y += 3;
+        
+        // On synchronise la position de la note avec le défilement du piano
+        const scrollX = document.getElementById('piano-container').scrollLeft;
+        el.style.transform = `translateX(${-scrollX}px)`;
         el.style.top = o.y + "px";
-        if(o.y < window.innerHeight && document.getElementById('game-container').style.display !== 'none') requestAnimationFrame(animate); else el.remove();
+        
+        if(o.y < window.innerHeight && document.getElementById('game-container').style.display !== 'none') {
+            requestAnimationFrame(animate); 
+        } else {
+            el.remove();
+        }
     }
     animate();
 }
