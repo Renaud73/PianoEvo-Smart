@@ -3,25 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PianoKid Evo - GitHub Edition</title>
+    <title>PianoKid Evo Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="main-menu">
         <div class="profile-bar">
-            <div class="user-info" onclick="openProfileModal()">
-                <div class="avatar" id="user-avatar">🎹</div>
-                <div>
-                    <div class="username" id="display-username">Apprenti</div>
-                    <div class="level-tag">Changer de profil</div>
-                </div>
-            </div>
-            <button id="mic-toggle" class="mic-btn-small" onclick="initMicrophone()">
-                <span id="status-text">🎤 Micro OFF</span>
+            <button onclick="openProfileModal()" class="profile-trigger">
+                👤 <span id="display-username">Apprenti</span>
             </button>
+            <button id="mic-toggle" onclick="initMicrophone()">🎤 Micro OFF</button>
         </div>
 
+        <button onclick="toggleFullScreen()" id="fs-btn">🖥️ PLEIN ÉCRAN</button>
         <div class="logo">PianoKid Evo</div>
         
         <div class="nav-tabs">
@@ -34,29 +29,22 @@
     </div>
 
     <div id="game-container" style="display:none;">
-        <div id="progress-container">
-            <div id="progress-inner"></div>
-        </div>
-
-        <div id="live-score">0000</div>
+        <div id="progress-container"><div id="progress-inner"></div></div>
         <div id="detected-note">--</div>
-        <button class="btn-close" onclick="quitGame()">❌</button>
-        
+        <button class="btn-close" onclick="quitGame()">❌ QUITTER</button>
         <div id="fall-zone"></div>
         <div id="collision-line"></div>
-        
-        <div id="piano-container">
-            <div id="piano"></div>
-        </div>
+        <div id="piano-container"><div id="piano"></div></div>
     </div>
 
     <div id="profile-modal" class="modal">
         <div class="modal-content">
-            <h2>Mes Profils</h2>
+            <h3>Mes Profils</h3>
             <div id="profiles-list"></div>
-            <hr>
-            <input type="text" id="input-username" placeholder="Prénom de l'enfant">
-            <button onclick="createNewProfile()" class="btn-add">CRÉER</button>
+            <div class="add-profile-box">
+                <input type="text" id="input-username" placeholder="Prénom">
+                <button onclick="createNewProfile()" class="btn-add">AJOUTER</button>
+            </div>
             <button onclick="closeProfileModal()" class="btn-secondary">FERMER</button>
         </div>
     </div>
