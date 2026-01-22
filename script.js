@@ -1,24 +1,97 @@
+// --- CONFIGURATION ET DONNÉES ---
 const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', 'A': 'LA', 'B': 'SI' };
-let audioContext, analyser, microphone, dataArray = new Float32Array(2048);
-let notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
-
-let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || ["Apprenti"];
-let currentProfile = localStorage.getItem('pk_current') || "Apprenti";
 
 const DATA = {
     cours: [
-        { titre: "1. Main Droite : DO-SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:1200}] },
-        { titre: "2. Main Gauche : DO-SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:1200}] }
+        { titre: "1. Main Droite : DO à SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:1200}] },
+        { titre: "2. Main Gauche : DO à SOL", diff: 'easy', notes: [{note:'C3', d:800},{note:'B2', d:800},{note:'A2', d:800},{note:'G2', d:800},{note:'F2', d:1200}] },
+        { titre: "3. La Gamme de DO Majeur", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] },
+        { titre: "4. Accords de Base (C, F, G)", diff: 'medium', notes: [{note:'C3', d:1000},{note:'E3', d:200},{note:'G3', d:1000}, {note:'F3', d:1000},{note:'A3', d:200},{note:'C4', d:1000}] },
+        { titre: "5. Arpèges Fluides", diff: 'hard', notes: [{note:'C3', d:400},{note:'E3', d:400},{note:'G3', d:400},{note:'C4', d:400},{note:'G3', d:400},{note:'E3', d:400},{note:'C3', d:800}] }
     ],
-    apprentissage: [{ titre: "Vitesse 4e/5e doigt", diff: 'hard', notes: [{note:'A2', d:400},{note:'G2', d:400},{note:'A2', d:400},{note:'G2', d:400},{note:'F2', d:800}] }],
-    morceaux: [{ titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000}] }]
+    apprentissage: [
+        { titre: "Déliateur 4e/5e doigt", diff: 'hard', notes: [{note:'G3', d:300},{note:'F3', d:300},{note:'G3', d:300},{note:'F3', d:300},{note:'E3', d:300},{note:'D3', d:300},{note:'C3', d:600}] },
+        { titre: "Sauts d'Octave", diff: 'medium', notes: [{note:'C3', d:600},{note:'C4', d:600},{note:'G2', d:600},{note:'G3', d:600},{note:'E2', d:600},{note:'E3', d:600}] },
+        { titre: "Rythme Alterné", diff: 'easy', notes: [{note:'C4', d:400},{note:'C3', d:400},{note:'C4', d:400},{note:'C3', d:400},{note:'G3', d:400},{note:'G2', d:400}] },
+        { titre: "Vitesse Chromatique", diff: 'hard', notes: [{note:'C3', d:250},{note:'C#3', d:250},{note:'D3', d:250},{note:'D#3', d:250},{note:'E3', d:250},{note:'F3', d:250}] }
+    ],
+    morceaux: [
+        { titre: "Au Clair de la Lune", diff: 'easy', notes: [{note:'C4', d:600},{note:'C4', d:600},{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:1000},{note:'D4', d:1000},{note:'C4', d:1200}] },
+        { titre: "Ah vous dirai-je Maman", diff: 'easy', notes: [{note:'C4', d:500},{note:'C4', d:500},{note:'G4', d:500},{note:'G4', d:500},{note:'A4', d:500},{note:'A4', d:500},{note:'G4', d:1000}] },
+        { titre: "Hymne à la Joie", diff: 'medium', notes: [{note:'E4', d:500},{note:'E4', d:500},{note:'F4', d:500},{note:'G4', d:500},{note:'G4', d:500},{note:'F4', d:500},{note:'E4', d:500},{note:'D4', d:500}] },
+        { titre: "Lettre à Élise (Intro)", diff: 'hard', notes: [{note:'E5', d:300},{note:'D#5', d:300},{note:'E5', d:300},{note:'D#5', d:300},{note:'E5', d:300},{note:'B4', d:300},{note:'D5', d:300},{note:'C5', d:300},{note:'A4', d:800}] }
+    ]
 };
 
-window.onload = () => { initPiano(); updateProfileDisplay(); switchTab('cours'); };
+// --- MOTEUR DE JEU ET AUDIO ---
+let audioContext, analyser, microphone, dataArray = new Float32Array(2048);
+let notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
+let particles = [];
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
+
+// Profils
+let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || ["Apprenti"];
+let currentProfile = localStorage.getItem('pk_current') || "Apprenti";
+
+window.onload = () => { 
+    initPiano(); 
+    updateProfileDisplay();
+    switchTab('cours'); 
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    animateParticles();
+};
+
+// --- FONCTIONS SYSTÈME (Particules, Audio, Piano) ---
+
+function resizeCanvas() { if(canvas) { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; } }
+
+class Particle {
+    constructor(x, y) {
+        this.x = x; this.y = y;
+        this.size = Math.random() * 5 + 2;
+        this.speedX = (Math.random() - 0.5) * 8;
+        this.speedY = (Math.random() - 0.5) * 8 - 5;
+        this.color = '#00f2ff';
+        this.alpha = 1;
+    }
+    update() { this.x += this.speedX; this.y += this.speedY; this.alpha -= 0.02; }
+    draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+}
+
+function createBurst(x, y) { for(let i=0; i<15; i++) particles.push(new Particle(x, y)); }
+
+function animateParticles() {
+    if(!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p, i) => { p.update(); p.draw(); if(p.alpha <= 0) particles.splice(i, 1); });
+    requestAnimationFrame(animateParticles);
+}
+
+function playNoteSound(frequency, volume = 0.3) {
+    if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    gain.gain.setValueAtTime(volume, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1.2);
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.start(); osc.stop(audioContext.currentTime + 1.2);
+}
+
+function getFreq(note) {
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const name = note.slice(0, -1);
+    const oct = parseInt(note.slice(-1));
+    return 440 * Math.pow(2, (notes.indexOf(name) + (oct - 4) * 12 - 9) / 12);
+}
 
 function initPiano() {
     const p = document.getElementById('piano');
+    p.innerHTML = '';
     [2, 3, 4, 5, 6].forEach(oct => {
         noteStrings.forEach(n => {
             const isBlack = n.includes('#');
@@ -27,7 +100,6 @@ function initPiano() {
             key.dataset.note = n + oct;
             if(!isBlack) key.textContent = noteNamesFR[n] || n;
             key.onmousedown = () => handleKeyPress(n + oct);
-            key.ontouchstart = (e) => { e.preventDefault(); handleKeyPress(n + oct); };
             p.appendChild(key);
         });
     });
@@ -49,13 +121,17 @@ function switchTab(t) {
 function startGame(data, mode) {
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('game-container').style.display = 'flex';
+    resizeCanvas();
     notesValidated = 0; totalNotesInLevel = data.notes.length; notesOnScreen = []; isPaused = false; currentMode = mode;
     updateProgress();
     let i = 0;
     const next = () => {
         if(i < data.notes.length && document.getElementById('game-container').style.display !== 'none') {
-            drop(data.notes[i]); i++;
-            setTimeout(next, data.notes[i-1].d || 1500);
+            const currentNote = data.notes[i];
+            drop(currentNote);
+            if(currentMode === 'flow') setTimeout(() => playNoteSound(getFreq(currentNote.note), 0.15), 1000); 
+            i++;
+            setTimeout(next, currentNote.d || 1500);
         }
     };
     next();
@@ -75,18 +151,14 @@ function drop(nData) {
         if(document.getElementById('game-container').style.display === 'none') { el.remove(); return; }
         const kRect = k.getBoundingClientRect();
         const zRect = fallZone.getBoundingClientRect();
-        
         el.style.left = (kRect.left - zRect.left) + "px";
         el.style.width = kRect.width + "px";
-        
         if(!isPaused) o.y += 5;
-        const limit = zRect.height;
-        
-        if(currentMode === 'step' && !o.ok && (o.y + o.h) >= limit) {
-            isPaused = true; o.y = limit - o.h; el.classList.add('waiting');
+        if(currentMode === 'step' && !o.ok && (o.y + o.h) >= zRect.height) {
+            isPaused = true; o.y = zRect.height - o.h; el.classList.add('waiting');
+            playNoteSound(getFreq(o.note), 0.05); 
             const container = document.getElementById('piano-container');
-            const targetX = k.offsetLeft - (container.offsetWidth / 2) + (k.offsetWidth / 2);
-            container.scrollTo({ left: targetX, behavior: 'smooth' });
+            container.scrollTo({ left: k.offsetLeft - (container.offsetWidth / 2) + (k.offsetWidth / 2), behavior: 'smooth' });
         }
         el.style.top = o.y + "px";
         if(o.y < zRect.height + 50) requestAnimationFrame(animate); 
@@ -97,19 +169,26 @@ function drop(nData) {
 
 function handleKeyPress(note) {
     const k = document.querySelector(`.key[data-note="${note}"]`);
-    if(k) { k.classList.add('active'); setTimeout(() => k.classList.remove('active'), 150); }
+    if(k) { 
+        k.classList.add('active'); setTimeout(() => k.classList.remove('active'), 150); 
+        playNoteSound(getFreq(note), 0.4);
+        const rect = k.getBoundingClientRect();
+        const fZone = document.getElementById('fall-zone').getBoundingClientRect();
+        createBurst(rect.left - fZone.left + rect.width/2, fZone.height - 10);
+    }
     const t = notesOnScreen.find(n => n.note === note && !n.ok);
     if(t) {
         t.ok = true; notesValidated++; updateProgress();
         const el = document.getElementById("n-" + t.id);
-        if(el) { el.remove(); }
+        if(el) el.remove();
         isPaused = false;
         if(notesValidated === totalNotesInLevel) setTimeout(quitGame, 1000);
     }
 }
 
+// UI & Profils
 function updateProgress() { document.getElementById('progress-inner').style.width = (notesValidated/totalNotesInLevel)*100 + "%"; }
-function quitGame() { document.getElementById('main-menu').style.display = 'block'; document.getElementById('game-container').style.display = 'none'; document.getElementById('fall-zone').innerHTML = ''; }
+function quitGame() { document.getElementById('main-menu').style.display = 'block'; document.getElementById('game-container').style.display = 'none'; document.getElementById('fall-zone').innerHTML = '<canvas id="particle-canvas"></canvas>'; resizeCanvas(); }
 function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
 function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; updateProfileDisplay(); }
 function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
@@ -134,6 +213,7 @@ function createNewProfile() {
     }
 }
 
+// Micro (détection optionnelle)
 async function initMicrophone() {
     try {
         if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
