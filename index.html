@@ -13,7 +13,7 @@
             <button onclick="openProfileModal()" class="profile-trigger">
                 👤 <span id="display-username">Apprenti</span>
             </button>
-            <button id="mic-toggle" onclick="initMicrophone()">🎤 Micro OFF</button>
+            <button id="mic-toggle" onclick="toggleMicrophone()">🎤 Micro OFF</button>
         </div>
 
         <button onclick="toggleFullScreen()" id="fs-btn">🖥️ PLEIN ÉCRAN</button>
@@ -30,14 +30,13 @@
 
     <div id="game-container" style="display:none;">
         <div id="progress-container"><div id="progress-inner"></div></div>
-        <div id="detected-note">--</div>
         <button class="btn-close" onclick="quitGame()">❌ QUITTER</button>
         
         <div id="game-layout">
             <div id="fall-zone">
                 <canvas id="particle-canvas"></canvas>
+                <div id="hit-line"></div>
             </div>
-
             <div id="piano-container">
                 <div id="piano"></div>
             </div>
