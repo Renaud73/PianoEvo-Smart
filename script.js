@@ -104,31 +104,42 @@ function startGame(data, mode) {
 
 function drop(nData) {
     const id = Math.random();
-    const o = { ...nData, y: 0, ok: false, id: id, h: 60 };
+    const o = { ...nData, y: -200, ok: false, id: id, h: 60 };
     notesOnScreen.push(o);
+    
     const k = document.querySelector(`.key[data-note="${o.note}"]`);
     if(!k) return;
 
     const el = document.createElement('div');
     el.className = 'falling-note'; el.id = "n-" + id; el.style.height = o.h + "px";
-    k.appendChild(el);
-
-    const container = document.getElementById('piano-container');
-    const scrollTarget = k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2);
-    container.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+    document.getElementById('game-layout').appendChild(el);
 
     function animate() {
-        if(document.getElementById('game-container').style.display === 'none') return;
-        const limit = window.innerHeight - (window.innerWidth > window.innerHeight ? 90 : 130);
-        
-        if(currentMode === 'step' && !o.ok && o.y >= limit - o.h) { 
-            isPaused = true; el.classList.add('waiting'); o.y = limit - o.h; 
+        if(document.getElementById('game-container').style.display === 'none') { el.remove(); return; }
+
+        const pianoContainer = document.getElementById('piano-container');
+        const pianoRect = pianoContainer.getBoundingClientRect();
+        const keyRect = k.getBoundingClientRect();
+
+        // Aligne la note sur la touche en temps réel
+        el.style.left = keyRect.left + "px";
+        el.style.width = keyRect.width + "px";
+
+        if(!isPaused) o.y += 4; // Vitesse de chute
+
+        const limit = pianoRect.top - o.h;
+
+        if(currentMode === 'step' && !o.ok && o.y >= limit) { 
+            isPaused = true; el.classList.add('waiting'); o.y = limit; 
+            // Centre le piano sur la touche
+            const scrollTarget = k.offsetLeft - (window.innerWidth / 2) + (k.offsetWidth / 2);
+            pianoContainer.scrollTo({ left: scrollTarget, behavior: 'smooth' });
         }
         
-        if(!isPaused) o.y += 3;
-        el.style.transform = `translateY(${-o.y}px)`;
+        el.style.top = o.y + "px";
         
-        if(o.y < window.innerHeight) requestAnimationFrame(animate); else el.remove();
+        if(o.y < window.innerHeight) requestAnimationFrame(animate); 
+        else { el.remove(); notesOnScreen = notesOnScreen.filter(n => n.id !== id); }
     }
     animate();
 }
