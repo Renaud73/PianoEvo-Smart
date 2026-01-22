@@ -3,16 +3,71 @@ const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', '
 
 const DATA = {
     cours: [
-        { titre: "1. Main Droite : DO à SOL", diff: 'easy', notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:800},{note:'F4', d:800},{note:'G4', d:1200}] },
-        { titre: "2. Gamme DO Majeur", diff: 'medium', notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] }
+        { 
+            titre: "1. Les premières notes (DO-RÉ-MI)", 
+            diff: 'easy', 
+            notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:1200},{note:'D4', d:800},{note:'C4', d:1200}] 
+        },
+        { 
+            titre: "2. La main droite complète (DO-SOL)", 
+            diff: 'easy', 
+            notes: [{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:600},{note:'F4', d:600},{note:'G4', d:1000},{note:'F4', d:600},{note:'E4', d:600},{note:'D4', d:600},{note:'C4', d:1000}] 
+        },
+        { 
+            titre: "3. La Gamme de DO Majeur", 
+            diff: 'medium', 
+            notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] 
+        },
+        { 
+            titre: "4. Accords de base (DO & SOL)", 
+            diff: 'medium', 
+            notes: [
+                {note:'C3', d:100}, {note:'E3', d:100}, {note:'G3', d:1200}, // Accord DO
+                {note:'G2', d:100}, {note:'B2', d:100}, {note:'D3', d:1200}  // Accord SOL
+            ] 
+        },
+        { 
+            titre: "5. Initiation aux Dièses (#)", 
+            diff: 'hard', 
+            notes: [{note:'F4', d:600},{note:'F#4', d:600},{note:'G4', d:1000},{note:'C#4', d:600},{note:'D4', d:1000}] 
+        }
     ],
     apprentissage: [
-        { titre: "Déliateur Arpège", diff: 'hard', notes: [{note:'C3', d:300},{note:'E3', d:300},{note:'G3', d:300},{note:'C4', d:300},{note:'G3', d:300},{note:'E3', d:300},{note:'C3', d:600}] }
+        { 
+            titre: "Agilité : Le Saut d'Octave", 
+            diff: 'medium', 
+            notes: [{note:'C3', d:400},{note:'C4', d:400},{note:'D3', d:400},{note:'D4', d:400},{note:'E3', d:400},{note:'E4', d:800}] 
+        },
+        { 
+            titre: "Vitesse : Arpège Chromatique", 
+            diff: 'hard', 
+            notes: [{note:'C4', d:200},{note:'C#4', d:200},{note:'D4', d:200},{note:'D#4', d:200},{note:'E4', d:200},{note:'F4', d:200},{note:'F#4', d:400}] 
+        },
+        { 
+            titre: "Endurance : Le Grand Final", 
+            diff: 'hard', 
+            notes: [
+                {note:'C3', d:250},{note:'E3', d:250},{note:'G3', d:250},{note:'C4', d:250},
+                {note:'B3', d:250},{note:'G3', d:250},{note:'E3', d:250},{note:'C3', d:500}
+            ] 
+        }
     ],
     morceaux: [
-        { titre: "Metallica - Nothing Else Matters", diff: 'medium', notes: [{note:'E2', d:600}, {note:'G2', d:600}, {note:'B2', d:600}, {note:'E3', d:1200}, {note:'B2', d:600}, {note:'G2', d:600}] },
-        { titre: "Alan Walker - Faded", diff: 'easy', notes: [{note:'D#4', d:500}, {note:'D#4', d:500}, {note:'D#4', d:500}, {note:'A#3', d:500}, {note:'F3', d:500}, {note:'F3', d:500}, {note:'F3', d:500}, {note:'G#3', d:1000}] },
-        { titre: "Loreen - Tattoo", diff: 'hard', notes: [{note:'G#4', d:400}, {note:'F#4', d:400}, {note:'G#4', d:400}, {note:'A#4', d:800}, {note:'G#4', d:400}, {note:'F#4', d:400}, {note:'D#4', d:1000}] }
+        { 
+            titre: "Metallica - Nothing Else Matters", 
+            diff: 'medium', 
+            notes: [{note:'E2', d:600}, {note:'G2', d:600}, {note:'B2', d:600}, {note:'E3', d:1200}, {note:'B2', d:600}, {note:'G2', d:600}] 
+        },
+        { 
+            titre: "Alan Walker - Faded", 
+            diff: 'easy', 
+            notes: [{note:'D#4', d:500}, {note:'D#4', d:500}, {note:'D#4', d:500}, {note:'A#3', d:500}, {note:'F3', d:500}, {note:'F3', d:500}, {note:'G#3', d:1000}] 
+        },
+        { 
+            titre: "Loreen - Tattoo", 
+            diff: 'hard', 
+            notes: [{note:'G#4', d:400}, {note:'F#4', d:400}, {note:'G#4', d:400}, {note:'A#4', d:800}, {note:'G#4', d:400}, {note:'F#4', d:400}, {note:'D#4', d:1000}] 
+        }
     ]
 };
 
