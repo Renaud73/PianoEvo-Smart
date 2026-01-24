@@ -3,6 +3,11 @@
     --accent: #00f2ff; 
     --accent-right: #ff8c00; 
     --easy: #2ecc71; 
+   :root { 
+    --bg: #050508; 
+    --accent: #00f2ff; 
+    --accent-right: #ff8c00; 
+    --easy: #2ecc71; 
     --medium: #f1c40f; 
     --hard: #e74c3c; 
 }
@@ -191,4 +196,5 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 @keyframes shock-expand {
     0% { width: 0; height: 0; opacity: 1; }
     100% { width: 80px; height: 80px; opacity: 0; }
+}}
 }
