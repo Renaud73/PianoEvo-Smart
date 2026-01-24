@@ -10,19 +10,22 @@
 
     <div id="main-menu">
         <div class="profile-bar">
-            <button onclick="openProfileModal()" class="profile-trigger">
-                👤 <span id="display-username">Apprenti</span>
-            </button>
-            <button id="mic-toggle" onclick="toggleMicrophone()">🎤 Micro OFF</button>
+            <div class="profile-left">
+                <button onclick="openProfileModal()" class="profile-trigger">
+                    👤 <span id="display-username">Apprenti</span>
+                </button>
+                <button onclick="toggleFullScreen()" id="fs-btn">🖥️</button>
+            </div>
+            <button id="mic-toggle">🎤 Micro OFF</button>
         </div>
 
-        <button onclick="toggleFullScreen()" id="fs-btn">🖥️ PLEIN ÉCRAN</button>
         <div class="logo">PianoKid Evo</div>
         
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('cours')">COURS</button>
-            <button class="tab-btn" onclick="switchTab('apprentissage')">EXERCICES</button>
-            <button class="tab-btn" onclick="switchTab('morceaux')">MUSIQUES</button>
+            <button class="tab-btn" onclick="switchTab('exercices')">EXERCICES</button>
+            <button class="tab-btn" onclick="switchTab('apprentissage')">APPRENTISSAGE</button>
+            <button class="tab-btn" onclick="switchTab('musique')">MUSIQUES</button>
         </div>
 
         <div id="content-grid" class="grid"></div>
@@ -33,13 +36,35 @@
         <button class="btn-close" onclick="quitGame()">❌ QUITTER</button>
         
         <div id="game-layout">
+            <div class="finger-guide-side left">
+                <div class="hand-flat left-hand">
+                    <div class="finger-flat pinky" data-f="5">5</div>
+                    <div class="finger-flat ring" data-f="4">4</div>
+                    <div class="finger-flat middle" data-f="3">3</div>
+                    <div class="finger-flat index" data-f="2">2</div>
+                    <div class="finger-flat thumb" data-f="1">1</div>
+                    <div class="palm-flat"></div>
+                </div>
+            </div>
+
             <div id="fall-zone">
-                <canvas id="particle-canvas"></canvas>
                 <div id="hit-line"></div>
             </div>
-            <div id="piano-container">
-                <div id="piano"></div>
+
+            <div class="finger-guide-side right">
+                <div class="hand-flat right-hand">
+                    <div class="finger-flat thumb" data-f="1">1</div>
+                    <div class="finger-flat index" data-f="2">2</div>
+                    <div class="finger-flat middle" data-f="3">3</div>
+                    <div class="finger-flat ring" data-f="4">4</div>
+                    <div class="finger-flat pinky" data-f="5">5</div>
+                    <div class="palm-flat"></div>
+                </div>
             </div>
+        </div>
+
+        <div id="piano-container">
+            <div id="piano"></div>
         </div>
     </div>
 
