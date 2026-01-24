@@ -1,308 +1,433 @@
 const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', 'A': 'LA', 'B': 'SI' };
-
+const noteColors = { 'C': '#FF0000', 'D': '#FF7F00', 'E': '#FFFF00', 'F': '#00FF00', 'G': '#0000FF', 'A': '#4B0082', 'B': '#8B00FF' };
+let gameLoopTimeout; // Variable pour stocker le minuteur du jeu
 const DATA = {
     cours: [
-        { 
-            titre: "1. Les premières notes (DO-RÉ-MI)", 
-            diff: 'easy', 
-            notes: [{note:'C4', d:800},{note:'D4', d:800},{note:'E4', d:1200},{note:'D4', d:800},{note:'C4', d:1200}] 
-        },
-        { 
-            titre: "2. La main droite complète (DO-SOL)", 
-            diff: 'easy', 
-            notes: [{note:'C4', d:600},{note:'D4', d:600},{note:'E4', d:600},{note:'F4', d:600},{note:'G4', d:1000},{note:'F4', d:600},{note:'E4', d:600},{note:'D4', d:600},{note:'C4', d:1000}] 
-        },
-        { 
-            titre: "3. La Gamme de DO Majeur", 
-            diff: 'medium', 
-            notes: [{note:'C3', d:500},{note:'D3', d:500},{note:'E3', d:500},{note:'F3', d:500},{note:'G3', d:500},{note:'A3', d:500},{note:'B3', d:500},{note:'C4', d:1000}] 
-        },
-        { 
-            titre: "4. Accords de base (DO & SOL)", 
-            diff: 'medium', 
-            notes: [
-                {note:'C3', d:100}, {note:'E3', d:100}, {note:'G3', d:1200}, // Accord DO
-                {note:'G2', d:100}, {note:'B2', d:100}, {note:'D3', d:1200}  // Accord SOL
-            ] 
-        },
-        { 
-            titre: "5. Initiation aux Dièses (#)", 
-            diff: 'hard', 
-            notes: [{note:'F4', d:600},{note:'F#4', d:600},{note:'G4', d:1000},{note:'C#4', d:600},{note:'D4', d:1000}] 
-        }
+        { titre: "1. DO - RÉ - MI (Main Droite)", diff: 'easy', notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'E4',f:3},{note:'D4',f:2},{note:'C4',f:1}] },
+        { titre: "2. La Main Droite complète (DO-SOL)", diff: 'easy', notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'E4',f:3},{note:'F4',f:4},{note:'G4',f:5}] },
+        { titre: "3. La Main Gauche (DO3-SOL3)", diff: 'easy', notes: [{note:'C3',m:'G',f:1},{note:'D3',m:'G',f:2},{note:'E3',m:'G',f:3},{note:'F3',m:'G',f:4},{note:'G3',m:'G',f:5}] },
+        { titre: "4. Extension : Le LA (6 notes)", diff: 'easy', notes: [{note:'C4',f:1},{note:'E4',f:3},{note:'G4',f:5},{note:'A4',f:5},{note:'G4',f:4}] },
+        { titre: "5. Saut d'Octave (DO3 à DO4)", diff: 'medium', notes: [{note:'C3',m:'G',f:1},{note:'C4',m:'D',f:1},{note:'C3',m:'G',f:1},{note:'C4',m:'D',f:1}] },
+        { titre: "6. Accords de base (DO Majeur)", diff: 'medium', notes: [{note:'C4',f:1},{note:'E4',f:3},{note:'G4',f:5}] },
+        { titre: "7. Passfage du Pouce (Gamme de DO)", diff: 'medium', notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'E4',f:3},{note:'F4',f:1},{note:'G4',f:2},{note:'A4',f:3},{note:'B4',f:4},{note:'C5',f:5}] },
+        { titre: "8. Les Touches Noires (FA#)", diff: 'hard', notes: [{note:'D4',f:1},{note:'F#4',f:3},{note:'A4',f:5}] },
+        { titre: "9. Arpège Simple", diff: 'hard', notes: [{note:'C4',f:1},{note:'E4',f:2},{note:'G4',f:3},{note:'C5',f:5}] },
+        { titre: "10. Coordination des mains", diff: 'hard', notes: [{note:'C3',m:'G',f:1},{note:'C4',m:'D',f:1},{note:'E3',m:'G',f:3},{note:'E4',m:'D',f:3}] }
     ],
-    apprentissage: [
-        { 
-            titre: "Agilité : Le Saut d'Octave", 
-            diff: 'medium', 
-            notes: [{note:'C3', d:400},{note:'C4', d:400},{note:'D3', d:400},{note:'D4', d:400},{note:'E3', d:400},{note:'E4', d:800}] 
-        },
-        { 
-            titre: "Vitesse : Arpège Chromatique", 
-            diff: 'hard', 
-            notes: [{note:'C4', d:200},{note:'C#4', d:200},{note:'D4', d:200},{note:'D#4', d:200},{note:'E4', d:200},{note:'F4', d:200},{note:'F#4', d:400}] 
-        },
-        { 
-            titre: "Endurance : Le Grand Final", 
-            diff: 'hard', 
-            notes: [
-                {note:'C3', d:250},{note:'E3', d:250},{note:'G3', d:250},{note:'C4', d:250},
-                {note:'B3', d:250},{note:'G3', d:250},{note:'E3', d:250},{note:'C3', d:500}
-            ] 
-        }
+    exercices: [
+        { titre: "1. Vélocité Hanon n°1", diff: 'medium', notes: [{note:'C4',f:1},{note:'E4',f:2},{note:'F4',f:3},{note:'G4',f:4},{note:'A4',f:5}] },
+        { titre: "2. Le Crabe (Indépendance)", diff: 'medium', notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'C4',f:1},{note:'E4',f:3}] },
+        { titre: "3. Force du Petit Doigt", diff: 'medium', notes: [{note:'G4',f:5},{note:'F4',f:4},{note:'G4',f:5},{note:'E4',f:3}] },
+        { titre: "4. Triolets rapides", diff: 'medium', notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'E4',f:3},{note:'C4',f:1},{note:'D4',f:2},{note:'E4',f:3}] },
+        { titre: "5. Écart de Quarte", diff: 'medium', notes: [{note:'C4',f:1},{note:'F4',f:4},{note:'C4',f:1},{note:'F4',f:4}] },
+        { titre: "6. Octaves Alternées", diff: 'hard', notes: [{note:'C3',f:1},{note:'C4',f:5},{note:'D3',f:1},{note:'D4',f:5}] },
+        { titre: "7. Gamme Chromatique", diff: 'hard', notes: [{note:'C4',f:1},{note:'C#4',f:3},{note:'D4',f:1},{note:'D#4',f:3}] },
+        { titre: "8. Accords de 4 notes", diff: 'hard', notes: [{note:'C4',f:1},{note:'E4',f:2},{note:'G4',f:3},{note:'B4',f:5}] },
+        { titre: "9. Vitesse Pouce-Index", diff: 'hard', notes: [{note:'C4',f:1},{note:'D4',f:2},{note:'C4',f:1},{note:'D4',f:2}] },
+        { titre: "10. Le Grand Final", diff: 'hard', notes: [{note:'C4',f:1},{note:'G4',f:5},{note:'C5',f:1},{note:'G5',f:5}] }
     ],
-    morceaux: [
-        { 
-            titre: "Metallica - Nothing Else Matters", 
-            diff: 'medium', 
-            notes: [{note:'E2', d:600}, {note:'G2', d:600}, {note:'B2', d:600}, {note:'E3', d:1200}, {note:'B2', d:600}, {note:'G2', d:600}] 
-        },
-        { 
-            titre: "Alan Walker - Faded", 
-            diff: 'easy', 
-            notes: [{note:'D#4', d:500}, {note:'D#4', d:500}, {note:'D#4', d:500}, {note:'A#3', d:500}, {note:'F3', d:500}, {note:'F3', d:500}, {note:'G#3', d:1000}] 
-        },
+apprentissage: [
         { 
             titre: "Loreen - Tattoo", 
             diff: 'hard', 
-            notes: [{note:'G#4', d:400}, {note:'F#4', d:400}, {note:'G#4', d:400}, {note:'A#4', d:800}, {note:'G#4', d:400}, {note:'F#4', d:400}, {note:'D#4', d:1000}] 
+            notes: [
+                // Intro - Ambiance mystique
+                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200},
+                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200},
+                // Couplet - "I don't care about them all..."
+                {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'D4', f:3, d:400}, {note:'C4', f:2, d:800},
+                {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'B3', f:1, d:800},
+                // Pré-refrain
+                {note:'E4', f:4, d:300}, {note:'F4', f:5, d:300}, {note:'E4', f:4, d:300}, {note:'D4', f:3, d:300}, {note:'C4', f:2, d:1200},
+                // Refrain - "No I don't care about the pain..."
+                {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600},
+                {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600},
+                {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'F4', f:3, d:400}, {note:'E4', f:2, d:1500}
+            ] 
+        },
+        { 
+            titre: "Metallica - Nothing Else Matters (Full)", 
+            diff: 'medium', 
+            notes: [
+                // Arpège Intro
+                {note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200},
+                {note:'B3', f:3, d:400}, {note:'G3', f:2, d:400}, {note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, 
+                {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200},
+                // Mélodie principale
+                {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900},
+                {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900}, {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, 
+                {note:'C4', f:3, d:600}, {note:'G3', f:1, d:900}, {note:'A3', f:2, d:1200},
+                // Suite de la mélodie
+                {note:'A3', f:1, d:400}, {note:'B3', f:2, d:400}, {note:'C4', f:3, d:800},
+                {note:'B3', f:2, d:400}, {note:'A3', f:1, d:400}, {note:'G3', f:1, d:1200}
+            ] 
+        },
+        { 
+            titre: "Pirates des Caraïbes (Extended)", 
+            diff: 'hard', 
+            notes: [
+                // Thème A
+                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:300}, {note:'D4', f:3, d:600}, {note:'D4', f:3, d:600},
+                {note:'D4', f:3, d:600}, {note:'E4', f:4, d:300}, {note:'F4', f:5, d:600}, {note:'F4', f:5, d:600},
+                {note:'F4', f:5, d:600}, {note:'G4', f:4, d:300}, {note:'E4', f:3, d:600}, {note:'E4', f:3, d:600},
+                {note:'D4', f:2, d:600}, {note:'C4', f:1, d:300}, {note:'D4', f:2, d:900},
+                // Thème B (plus haut)
+                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:300}, {note:'D4', f:3, d:600}, {note:'D4', f:3, d:600},
+                {note:'D4', f:3, d:600}, {note:'F4', f:5, d:300}, {note:'G4', f:1, d:600}, {note:'G4', f:1, d:600},
+                {note:'G4', f:1, d:600}, {note:'A4', f:2, d:300}, {note:'A#4', f:3, d:600}, {note:'A#4', f:3, d:600},
+                {note:'A4', f:2, d:600}, {note:'G4', f:1, d:300}, {note:'A4', f:2, d:1200}
+            ] 
+        }
+    ],
+    musique: [
+        { 
+            titre: "Hallelujah (Extended)", 
+            diff: 'easy', 
+            notes: [
+                // Intro & Couplet
+                {note:'E4', f:1, d:600}, {note:'G4', f:3, d:300}, {note:'G4', f:3, d:600}, {note:'G4', f:3, d:600},
+                {note:'A4', f:4, d:300}, {note:'A4', f:4, d:600}, {note:'A4', f:4, d:600},
+                {note:'G4', f:3, d:300}, {note:'G4', f:3, d:600}, {note:'G4', f:3, d:600},
+                {note:'A4', f:4, d:300}, {note:'A4', f:4, d:600}, {note:'A4', f:4, d:600},
+                {note:'G4', f:3, d:400}, {note:'A4', f:4, d:400}, {note:'B4', f:5, d:800},
+                {note:'B4', f:5, d:400}, {note:'B4', f:5, d:400}, {note:'C5', f:5, d:800},
+                {note:'C5', f:5, d:400}, {note:'C5', f:5, d:400}, {note:'D5', f:5, d:800},
+                // Grand Refrain "Hallelujah"
+                {note:'E4', f:1, d:1200}, {note:'G4', f:3, d:400}, {note:'A4', f:4, d:1600},
+                {note:'A4', f:4, d:400}, {note:'G4', f:3, d:1600}, {note:'E4', f:1, d:400}, 
+                {note:'E4', f:1, d:800}, {note:'F4', f:2, d:400}, {note:'E4', f:1, d:1200},
+                {note:'D4', f:1, d:400}, {note:'C4', f:1, d:2000}
+            ] 
+        },
+        { 
+            titre: "Loreen - Tattoo (Grand Final)", 
+            diff: 'hard', 
+            notes: [
+                // Intro mystique
+                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200},
+                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200},
+                // Montée en puissance
+                {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'D4', f:3, d:400}, {note:'C4', f:2, d:800},
+                {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'B3', f:1, d:800},
+                {note:'E4', f:4, d:300}, {note:'F4', f:5, d:300}, {note:'E4', f:4, d:300}, {note:'D4', f:3, d:300}, {note:'C4', f:2, d:1200},
+                // Refrain Explosif
+                {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600},
+                {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600},
+                {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'F4', f:3, d:400}, {note:'E4', f:2, d:600},
+                {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'C4', f:1, d:1500},
+                // Outro calme
+                {note:'A3', f:1, d:800}, {note:'C4', f:2, d:800}, {note:'E3', f:1, d:2000}
+            ] 
+        },
+        { 
+            titre: "Pirates des Caraïbes (Full Theme)", 
+            diff: 'hard', 
+            notes: [
+                // Theme principal A
+                {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
+                {note:'D4', f:3, d:500}, {note:'E4', f:4, d:250}, {note:'F4', f:5, d:500}, {note:'F4', f:5, d:500},
+                {note:'F4', f:5, d:500}, {note:'G4', f:4, d:250}, {note:'E4', f:3, d:500}, {note:'E4', f:3, d:500},
+                {note:'D4', f:2, d:500}, {note:'C4', f:1, d:250}, {note:'D4', f:2, d:750},
+                // Theme B
+                {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
+                {note:'D4', f:3, d:500}, {note:'F4', f:5, d:250}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500},
+                {note:'G4', f:1, d:500}, {note:'A4', f:2, d:250}, {note:'A#4', f:3, d:500}, {note:'A#4', f:3, d:500},
+                {note:'A4', f:2, d:500}, {note:'G4', f:1, d:250}, {note:'A4', f:2, d:750},
+                // Final puissant
+                {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
+                {note:'D4', f:3, d:500}, {note:'F4', f:5, d:250}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500},
+                {note:'E4', f:3, d:500}, {note:'F4', f:4, d:250}, {note:'D4', f:2, d:1500}
+            ] 
+        },
+        { 
+            titre: "Metallica - Nothing Else Matters", 
+            diff: 'medium', 
+            notes: [
+                // Arpège Intro (x2)
+                {note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200},
+                {note:'B3', f:3, d:400}, {note:'G3', f:2, d:400}, {note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, 
+                {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200},
+                // Chant principal
+                {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900},
+                {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900}, {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, 
+                {note:'C4', f:3, d:600}, {note:'G3', f:1, d:900}, {note:'A3', f:2, d:1200},
+                // Pont
+                {note:'A3', f:1, d:400}, {note:'B3', f:2, d:400}, {note:'C4', f:3, d:800},
+                {note:'B3', f:2, d:400}, {note:'A3', f:1, d:400}, {note:'G3', f:1, d:800},
+                {note:'E3', f:1, d:2000}
+            ] 
         }
     ]
+
 };
 
-let audioContext, analyser, microphone, micStream, isMicOn = false, dataArray = new Float32Array(2048);
-let notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
-let particles = [];
-const canvas = document.getElementById('particle-canvas');
-const ctx = canvas ? canvas.getContext('2d') : null;
-const FALL_SPEED = 5;
+let audioContext, notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
+let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || [{name: "Apprenti", color: "#00f2ff", avatar: "🎹"}];
+let currentProfileName = localStorage.getItem('pk_current') || "Apprenti";
+let completedLevels = JSON.parse(localStorage.getItem('pk_completed')) || [];
+let currentLevelTitle = "", isMicActive = false;
+let audioAnalyser, microphoneStream, pitchBuffer = new Float32Array(2048);
 
-let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || ["Apprenti"];
-let currentProfile = localStorage.getItem('pk_current') || "Apprenti";
+window.onload = () => { 
+    initPiano(); updateProfileDisplay(); switchTab('cours'); 
+    document.getElementById('mic-toggle').onclick = toggleMic;
+    injectColorPicker();
+};
 
-window.onload = () => { initPiano(); updateProfileDisplay(); switchTab('cours'); resizeCanvas(); animateParticles(); };
-window.onresize = resizeCanvas;
-
-function resizeCanvas() { if(canvas) { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; } }
-
-// --- AUDIO ---
-function playNoteSound(freq, vol = 0.3) {
-    if(!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioContext.createOscillator();
-    const g = audioContext.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-    g.gain.setValueAtTime(vol, audioContext.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1);
-    osc.connect(g); g.connect(audioContext.destination);
-    osc.start(); osc.stop(audioContext.currentTime + 1);
+function injectColorPicker() {
+    const addBox = document.querySelector('.add-profile-box');
+    if(addBox && !document.getElementById('color-picker')){
+        const picker = document.createElement('input');
+        picker.type = 'color'; picker.id = 'color-picker'; picker.value = '#00f2ff';
+        picker.style.marginRight = '10px';
+        addBox.insertBefore(picker, addBox.firstChild);
+    }
 }
 
-function getFreq(note) {
-    const n = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    return 440 * Math.pow(2, (n.indexOf(note.slice(0,-1)) + (parseInt(note.slice(-1)) - 4) * 12 - 9) / 12);
-}
-
-// --- MICROPHONE ON/OFF ---
-async function toggleMicrophone() {
-    const btn = document.getElementById('mic-toggle');
-    if (!isMicOn) {
-        try {
-            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            microphone = audioContext.createMediaStreamSource(micStream);
-            analyser = audioContext.createAnalyser(); 
-            analyser.fftSize = 2048;
-            microphone.connect(analyser);
-            isMicOn = true;
-            btn.textContent = "🎤 Micro ON";
-            btn.style.background = "var(--easy)"; btn.style.color = "#000";
-            detect();
-        } catch (e) { alert("Micro non accessible."); }
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => alert(`Erreur : ${err.message}`));
     } else {
-        if (micStream) micStream.getTracks().forEach(t => t.stop());
-        isMicOn = false;
-        btn.textContent = "🎤 Micro OFF";
-        btn.style.background = "#333"; btn.style.color = "white";
+        if (document.exitFullscreen) document.exitFullscreen();
     }
 }
 
-function detect() {
-    if (!isMicOn) return;
-    analyser.getFloatTimeDomainData(dataArray);
-    let rms = 0; for (let i = 0; i < dataArray.length; i++) rms += dataArray[i] * dataArray[i];
-    if (Math.sqrt(rms / dataArray.length) > 0.05) {
-        const f = autoCorrelate(dataArray, audioContext.sampleRate);
-        if (f !== -1) {
-            const n = Math.round(12 * (Math.log(f / 440) / Math.log(2))) + 69;
-            handleKeyPress(noteStrings[n % 12] + (Math.floor(n / 12) - 1));
-        }
-    }
-    requestAnimationFrame(detect);
-}
-
-// --- PARTICULES ---
-class Particle {
-    constructor(x, y) {
-        this.x = x; this.y = y; this.size = Math.random()*4+2;
-        this.spX = (Math.random()-0.5)*10; this.spY = (Math.random()-0.5)*10-5;
-        this.alpha = 1;
-    }
-    update() { this.x += this.spX; this.y += this.spY; this.alpha -= 0.02; }
-    draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = '#00f2ff'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); ctx.restore(); }
-}
-
-function animateParticles() {
-    if(!ctx) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach((p,i) => { p.update(); p.draw(); if(p.alpha<=0) particles.splice(i,1); });
-    requestAnimationFrame(animateParticles);
-}
-
-// --- JEU ---
 function initPiano() {
-    const p = document.getElementById('piano');
+    const p = document.getElementById('piano'); p.innerHTML = ''; let whiteKeyPosition = 0;
     [2,3,4,5,6].forEach(oct => {
         noteStrings.forEach(n => {
-            const isB = n.includes('#');
-            const k = document.createElement('div');
-            k.className = `key ${isB?'black':''}`;
-            k.dataset.note = n+oct;
-            if(!isB) k.textContent = noteNamesFR[n];
-            k.onmousedown = () => handleKeyPress(n+oct);
-            p.appendChild(k);
+            if(oct === 6 && n !== 'C') return;
+            const isB = n.includes('#'), k = document.createElement('div');
+            k.className = `key ${isB ? 'black' : 'white'}`; k.dataset.note = n+oct;
+            if(!isB) {
+                k.innerHTML = `<span style="color: ${noteColors[n]}">${noteNamesFR[n]}</span>`;
+                k.style.left = `${whiteKeyPosition}px`; whiteKeyPosition += 55;
+            } else { k.style.left = `${whiteKeyPosition - 55 + 27.5 - 15}px`; }
+            k.onmousedown = () => handleKeyPress(n+oct); p.appendChild(k);
         });
     });
+    p.style.width = `${whiteKeyPosition + 40}px`;
 }
 
-function switchTab(t) {
-    const g = document.getElementById('content-grid'); g.innerHTML = '';
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(t.substring(0,2))));
-    DATA[t].forEach(item => {
-        const c = document.createElement('div');
+function switchTab(tabType) {
+    const g = document.getElementById('content-grid'); 
+    g.innerHTML = '';
+    
+    // 1. Gérer l'illumination des boutons (les onglets)
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        // On récupère l'attribut onclick pour savoir quel type il déclenche
+        const onclickAttr = btn.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(`'${tabType}'`)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // 2. Charger le contenu depuis DATA
+    const items = DATA[tabType] || [];
+    items.forEach(item => {
+        const c = document.createElement('div'); 
         c.className = 'card';
-        c.innerHTML = `<div style="color:var(--${item.diff}); font-size:10px; font-weight:bold;">${item.diff.toUpperCase()}</div><div style="font-size:13px; margin-top:5px;">${item.titre}</div>`;
-        c.onclick = () => startGame(item, (t === 'morceaux' ? 'flow' : 'step'));
+        c.innerHTML = `
+            <div style="display:flex; justify-content:space-between; font-size:10px;">
+                <b class="diff-${item.diff}">${item.diff.toUpperCase()}</b>
+                ${completedLevels.includes(item.titre) ? '✅' : ''}
+            </div>
+            <div style="margin-top:5px; font-weight:bold;">${item.titre}</div>
+        `;
+       c.onclick = () => { 
+            currentLevelTitle = item.titre; 
+            // Si l'onglet est 'musique', on lance en mode auto, sinon en mode step
+            const mode = (tabType === 'musique') ? 'auto' : 'step';
+            startGame(item, mode); 
+        };
         g.appendChild(c);
     });
 }
 
-function startGame(data, mode) {
-    document.getElementById('main-menu').style.display='none';
-    document.getElementById('game-container').style.display='flex';
-    resizeCanvas();
-    notesValidated = 0; totalNotesInLevel = data.notes.length; notesOnScreen = []; isPaused = false; currentMode = mode;
-    updateProgress();
+function handleKeyPress(note) {
+    const k = document.querySelector(`.key[data-note="${note}"]`);
+    if(k) { 
+        k.classList.add('active'); setTimeout(()=>k.classList.remove('active'), 200);
+        const t = notesOnScreen.find(n => n.note === note && !n.ok);
+        if(t) {
+            t.ok = true; notesValidated++;
+            const el = document.getElementById("n-"+t.id);
+            if(el) {
+                const rect = el.getBoundingClientRect(), fZone = document.getElementById('fall-zone'), fRect = fZone.getBoundingClientRect();
+                createExplosion(rect.left - fRect.left + (rect.width/2), rect.top - fRect.top + (rect.height/2), noteColors[note.replace(/[0-9#]/g, '')] || '#fff');
+                el.remove();
+            }
+            isPaused = false; playNoteSound(getFreq(note));
+            if(notesValidated === totalNotesInLevel) { saveProgress(currentLevelTitle); setTimeout(() => { alert("Bravo !"); quitGame(); }, 500); }
+        } else { playNoteSound(getFreq(note)); }
+    }
+}
+
+function createExplosion(x, y, color) {
+    const fZone = document.getElementById('fall-zone');
+    const shock = document.createElement('div');
+    shock.className = 'shockwave'; shock.style.left = x+'px'; shock.style.top = y+'px';
+    shock.style.borderColor = color; shock.style.boxShadow = `0 0 15px ${color}`;
+    fZone.appendChild(shock); setTimeout(() => shock.remove(), 400);
+
+    for (let i = 0; i < 15; i++) {
+        const p = document.createElement('div'); p.className = 'smoke-particle';
+        p.style.backgroundColor = color; p.style.left = x+'px'; p.style.top = y+'px';
+        p.style.boxShadow = `0 0 10px ${color}`;
+        const angle = (Math.random() * Math.PI) + Math.PI; 
+        const force = 30 + Math.random() * 60;
+        p.style.setProperty('--vx', `${Math.cos(angle)*force}px`);
+        p.style.setProperty('--vy', `${Math.sin(angle)*force - 50}px`);
+        fZone.appendChild(p); setTimeout(() => p.remove(), 1200);
+    }
+}
+
+function drop(nData) {
+    const fZone = document.getElementById('fall-zone'), k = document.querySelector(`.key[data-note="${nData.note}"]`);
+    if(!k) return;
+    const id = Math.random(), o = { ...nData, y: -100, ok: false, id: id, h: 70 };
+    notesOnScreen.push(o);
+    const el = document.createElement('div'); el.className = 'falling-note'; el.id = "n-"+id;
+    el.style.width = k.offsetWidth + "px"; el.style.height = o.h + "px"; el.style.left = k.offsetLeft + "px";
+    el.style.background = `linear-gradient(to bottom, ${noteColors[o.note.replace(/[0-9#]/g, '')] || '#00f2ff'}, #fff)`;
     
+    if (o.f) { 
+        const ind = document.createElement('div'); 
+        ind.className = 'finger-indicator ' + (o.m === 'G' ? 'finger-left' : 'finger-right'); 
+        ind.textContent = o.f; el.appendChild(ind); 
+    }
+    fZone.appendChild(el);
+
+    const animate = () => {
+        if(!isPaused) o.y += 4;
+        const hit = fZone.offsetHeight - o.h;
+
+        // --- LOGIQUE AUTOMATIQUE POUR LE MODE MUSIQUE ---
+        if(currentMode === 'auto' && !o.ok && o.y >= hit) {
+            handleKeyPress(o.note); // Joue la note automatiquement
+            o.ok = true; // Empêche de la rejouer en boucle
+        }
+
+        // --- LOGIQUE PAUSE POUR LES AUTRES MODES ---
+        if(currentMode === 'step' && !o.ok && o.y >= hit) { 
+            isPaused = true; 
+            o.y = hit; 
+        }
+
+        el.style.top = o.y + "px";
+        if(o.y < fZone.offsetHeight + 100 && document.getElementById("n-"+id)) {
+            requestAnimationFrame(animate);
+        } else { 
+            el.remove(); 
+        }
+    }; animate();
+}
+
+function startGame(data, mode) {
+    // 1. ARRÊT TOTAL de la boucle précédente
+    clearTimeout(gameLoopTimeout);
+    
+    // 2. NETTOYAGE de la zone de chute et de la liste des notes
+    const fZone = document.getElementById('fall-zone');
+    fZone.innerHTML = ''; 
+    notesOnScreen = []; 
+
+    // 3. INITIALISATION DU NOUVEAU COURS
+    document.getElementById('main-menu').style.display='none'; 
+    document.getElementById('game-container').style.display='flex';
+    fZone.style.width = document.getElementById('piano').offsetWidth + "px";
+    
+    notesValidated = 0; 
+    totalNotesInLevel = data.notes.length; 
+    isPaused = false; 
+    currentMode = mode;
+
     let i = 0;
     const next = () => {
-        if(i < data.notes.length && document.getElementById('game-container').style.display !== 'none') {
-            const n = data.notes[i];
-            drop(n);
-            if(currentMode === 'flow') {
-                const fZoneHeight = document.getElementById('fall-zone').offsetHeight;
-                const delay = ((fZoneHeight - 70) / FALL_SPEED) * 16.6;
-                setTimeout(() => {
-                    if(!isPaused && document.getElementById('game-container').style.display !== 'none') {
-                        playNoteSound(getFreq(n.note), 0.15);
-                    }
-                }, delay);
-            }
+        if(i < data.notes.length) {
+            const noteData = data.notes[i];
+            drop(noteData);
             i++;
-            setTimeout(next, n.d || 1500);
+            // On stocke le timeout dans gameLoopTimeout
+            gameLoopTimeout = setTimeout(next, noteData.d || 800); 
         }
     };
     next();
 }
-
-function drop(nData) {
-    const id = Math.random();
-    const o = { ...nData, y: -120, ok: false, id: id, h: 70 };
-    notesOnScreen.push(o);
-    const k = document.querySelector(`.key[data-note="${o.note}"]`);
-    const fZone = document.getElementById('fall-zone');
-    const el = document.createElement('div');
-    el.className = 'falling-note'; el.id = "n-"+id; el.style.height = o.h+"px";
-    el.style.background = "linear-gradient(to bottom, rgba(0,242,255,0) 0%, var(--accent) 100%)";
-    el.style.boxShadow = "0px 8px 15px var(--accent)";
-    
-    fZone.appendChild(el);
-
-    function animate() {
-        if(document.getElementById('game-container').style.display==='none') { el.remove(); return; }
-        const kR = k.getBoundingClientRect();
-        const zR = fZone.getBoundingClientRect();
-        el.style.left = (kR.left - zR.left) + "px";
-        el.style.width = kR.width + "px";
-        
-        if(!isPaused) o.y += FALL_SPEED;
-        const hitPoint = zR.height - o.h;
-
-        if(currentMode === 'step' && !o.ok && o.y >= hitPoint) {
-            isPaused = true; o.y = hitPoint; el.classList.add('waiting');
-            const container = document.getElementById('piano-container');
-            container.scrollTo({ left: k.offsetLeft - (container.offsetWidth/2) + (k.offsetWidth/2), behavior: 'smooth' });
-        }
-        
-        el.style.top = o.y + "px";
-        if(o.y < zR.height + 100) requestAnimationFrame(animate); 
-        else { el.remove(); notesOnScreen = notesOnScreen.filter(n => n.id !== id); }
-    }
-    animate();
+function quitGame() {
+    // On arrête tout ici aussi pour être sûr
+    clearTimeout(gameLoopTimeout);
+    document.getElementById('main-menu').style.display='block'; 
+    document.getElementById('game-container').style.display='none'; 
+    document.getElementById('fall-zone').innerHTML = '';
+    notesOnScreen = []; 
 }
-
-function handleKeyPress(note) {
-    const k = document.querySelector(`.key[data-note="${note}"]`);
-    if(k) {
-        k.classList.add('active'); setTimeout(()=>k.classList.remove('active'),150);
-        playNoteSound(getFreq(note), 0.4);
-        const r = k.getBoundingClientRect();
-        const fR = document.getElementById('fall-zone').getBoundingClientRect();
-        for(let i=0; i<15; i++) particles.push(new Particle(r.left - fR.left + r.width/2, fR.height));
-    }
-    const t = notesOnScreen.find(n => n.note === note && !n.ok);
-    if(t) {
-        t.ok = true; notesValidated++; updateProgress();
-        const el = document.getElementById("n-"+t.id);
-        if(el) el.remove();
-        isPaused = false;
-        if(notesValidated === totalNotesInLevel) setTimeout(quitGame, 1000);
-    }
-}
-
-// --- UTILS ---
-function updateProgress() { document.getElementById('progress-inner').style.width = (notesValidated/totalNotesInLevel)*100 + "%"; }
-function quitGame() { document.getElementById('main-menu').style.display='block'; document.getElementById('game-container').style.display='none'; document.getElementById('fall-zone').innerHTML = '<canvas id="particle-canvas"></canvas><div id="hit-line"></div>'; resizeCanvas(); }
-function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
-function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; updateProfileDisplay(); }
-function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
 function updateProfileDisplay() {
     const list = document.getElementById('profiles-list'); list.innerHTML = '';
-    profiles.forEach(name => {
+    profiles.forEach((p, index) => {
         const item = document.createElement('div'); item.className = 'profile-item';
-        item.innerHTML = `<span>👤 ${name}</span> ${name === currentProfile ? '✅' : ''}`;
-        item.onclick = () => { currentProfile = name; localStorage.setItem('pk_current', name); updateProfileDisplay(); closeProfileModal(); };
-        list.appendChild(item);
+        item.style.borderLeft = `4px solid ${p.color}`;
+        item.innerHTML = `<span>${p.avatar} ${p.name} ${p.name === currentProfileName ? '✅' : ''}</span>
+                          <button onclick="deleteProfile(${index}, event)" class="btn-del">🗑️</button>`;
+        item.onclick = () => selectProfile(p.name); list.appendChild(item);
     });
-    document.getElementById('display-username').textContent = currentProfile;
+    const curr = profiles.find(p => p.name === currentProfileName) || profiles[0];
+    document.getElementById('display-username').textContent = curr.name;
+    document.documentElement.style.setProperty('--accent', curr.color);
 }
+
 function createNewProfile() {
-    const val = document.getElementById('input-username').value.trim();
-    if(val && !profiles.includes(val)) {
-        profiles.push(val); localStorage.setItem('pk_profiles', JSON.stringify(profiles));
-        currentProfile = val; localStorage.setItem('pk_current', val);
-        document.getElementById('input-username').value = ''; updateProfileDisplay(); closeProfileModal();
+    const input = document.getElementById('input-username'), colorP = document.getElementById('color-picker');
+    if(input.value.trim()) {
+        profiles.push({ name: input.value.trim(), color: colorP.value, avatar: "🎵" });
+        localStorage.setItem('pk_profiles', JSON.stringify(profiles)); updateProfileDisplay(); input.value = '';
     }
 }
+
+function deleteProfile(i, e) { e.stopPropagation(); if(profiles.length > 1 && confirm("Supprimer ?")) { profiles.splice(i, 1); localStorage.setItem('pk_profiles', JSON.stringify(profiles)); updateProfileDisplay(); } }
+function selectProfile(n) { currentProfileName = n; localStorage.setItem('pk_current', n); updateProfileDisplay(); closeProfileModal(); }
+function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; }
+function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+function quitGame() { document.getElementById('main-menu').style.display='block'; document.getElementById('game-container').style.display='none'; notesOnScreen = []; }
+function saveProgress(t) { if(!completedLevels.includes(t)) { completedLevels.push(t); localStorage.setItem('pk_completed', JSON.stringify(completedLevels)); } }
+function getFreq(n) { const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]; return 440 * Math.pow(2, (notes.indexOf(n.slice(0,-1)) + (parseInt(n.slice(-1)) - 4) * 12 - 9) / 12); }
+function playNoteSound(f) { if(!audioContext) audioContext = new AudioContext(); const o = audioContext.createOscillator(), g = audioContext.createGain(); o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1); o.connect(g); g.connect(audioContext.destination); o.start(); o.stop(audioContext.currentTime + 1); }
+
+async function toggleMic() {
+    const btn = document.getElementById('mic-toggle');
+    if (!isMicActive) {
+        try {
+            microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            isMicActive = true; btn.textContent = "🎤 Micro ON"; btn.classList.add('mic-active');
+            if(!audioContext) audioContext = new AudioContext();
+            const source = audioContext.createMediaStreamSource(microphoneStream);
+            audioAnalyser = audioContext.createAnalyser(); audioAnalyser.fftSize = 2048;
+            source.connect(audioAnalyser);
+            const detect = () => { if(!isMicActive) return; audioAnalyser.getFloatTimeDomainData(pitchBuffer); let f = autoCorrelate(pitchBuffer, audioContext.sampleRate); if(f !== -1) { let n = getNoteFromFreq(f); if(n) handleKeyPress(n); } requestAnimationFrame(detect); };
+            detect();
+        } catch (err) { alert("Micro non activé."); }
+    } else {
+        isMicActive = false; btn.textContent = "🎤 Micro OFF"; btn.classList.remove('mic-active');
+        if(microphoneStream) microphoneStream.getTracks().forEach(t => t.stop());
+    }
+}
+
 function autoCorrelate(b, s) {
-    let SIZE = b.length, rms = 0;
-    for (let i = 0; i < SIZE; i++) rms += b[i] * b[i];
-    if (Math.sqrt(rms / SIZE) < 0.01) return -1;
-    let c = new Array(SIZE).fill(0);
-    for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + b[j] * b[j + i];
-    let d = 0; while (c[d] > c[d + 1]) d++;
-    let maxv = -1, maxp = -1;
-    for (let i = d; i < SIZE; i++) { if (c[i] > maxv) { maxv = c[i]; maxp = i; } }
+    let rms = 0; for(let i=0;i<b.length;i++) rms += b[i]*b[i]; if(Math.sqrt(rms/b.length)<0.05) return -1;
+    let r1=0, r2=b.length-1, thres=0.2;
+    for(let i=0;i<b.length/2;i++) if(Math.abs(b[i])<thres){r1=i;break;}
+    for(let i=1;i<b.length/2;i++) if(Math.abs(b[b.length-i])<thres){r2=b.length-i;break;}
+    let b2 = b.slice(r1,r2), c = new Float32Array(b2.length);
+    for(let i=0;i<b2.length;i++) for(let j=0;j<b2.length-i;j++) c[i] += b2[j]*b2[j+i];
+    let d=0; while(c[d]>c[d+1]) d++;
+    let maxv=-1, maxp=-1; for(let i=d;i<b2.length;i++) if(c[i]>maxv){maxv=c[i];maxp=i;}
     return s / maxp;
+}
+
+function getNoteFromFreq(f) {
+    const n = 12 * (Math.log2(f / 440)) + 69; if(isNaN(n)) return null;
+    return noteStrings[Math.round(n)%12] + (Math.floor(Math.round(n)/12)-1);
 }
