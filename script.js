@@ -80,12 +80,11 @@ apprentissage: [
             ] 
         }
     ],
-    musique: [
+musique: [
         { 
             titre: "Hallelujah (Extended)", 
             diff: 'easy', 
             notes: [
-                // Intro & Couplet
                 {note:'E4', f:1, d:600}, {note:'G4', f:3, d:300}, {note:'G4', f:3, d:600}, {note:'G4', f:3, d:600},
                 {note:'A4', f:4, d:300}, {note:'A4', f:4, d:600}, {note:'A4', f:4, d:600},
                 {note:'G4', f:3, d:300}, {note:'G4', f:3, d:600}, {note:'G4', f:3, d:600},
@@ -93,7 +92,6 @@ apprentissage: [
                 {note:'G4', f:3, d:400}, {note:'A4', f:4, d:400}, {note:'B4', f:5, d:800},
                 {note:'B4', f:5, d:400}, {note:'B4', f:5, d:400}, {note:'C5', f:5, d:800},
                 {note:'C5', f:5, d:400}, {note:'C5', f:5, d:400}, {note:'D5', f:5, d:800},
-                // Grand Refrain "Hallelujah"
                 {note:'E4', f:1, d:1200}, {note:'G4', f:3, d:400}, {note:'A4', f:4, d:1600},
                 {note:'A4', f:4, d:400}, {note:'G4', f:3, d:1600}, {note:'E4', f:1, d:400}, 
                 {note:'E4', f:1, d:800}, {note:'F4', f:2, d:400}, {note:'E4', f:1, d:1200},
@@ -104,62 +102,87 @@ apprentissage: [
             titre: "Loreen - Tattoo (Grand Final)", 
             diff: 'hard', 
             notes: [
-                // Intro mystique
                 {note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200},
                 {note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200},
-                // Montée en puissance
                 {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'D4', f:3, d:400}, {note:'C4', f:2, d:800},
                 {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'B3', f:1, d:800},
                 {note:'E4', f:4, d:300}, {note:'F4', f:5, d:300}, {note:'E4', f:4, d:300}, {note:'D4', f:3, d:300}, {note:'C4', f:2, d:1200},
-                // Refrain Explosif
                 {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600},
                 {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600},
                 {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'F4', f:3, d:400}, {note:'E4', f:2, d:600},
-                {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'C4', f:1, d:1500},
-                // Outro calme
-                {note:'A3', f:1, d:800}, {note:'C4', f:2, d:800}, {note:'E3', f:1, d:2000}
+                {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'C4', f:1, d:1500}
             ] 
         },
         { 
-            titre: "Pirates des Caraïbes (Full Theme)", 
+            titre: "Pirates des Caraïbes (Full)", 
             diff: 'hard', 
             notes: [
-                // Theme principal A
                 {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
                 {note:'D4', f:3, d:500}, {note:'E4', f:4, d:250}, {note:'F4', f:5, d:500}, {note:'F4', f:5, d:500},
                 {note:'F4', f:5, d:500}, {note:'G4', f:4, d:250}, {note:'E4', f:3, d:500}, {note:'E4', f:3, d:500},
-                {note:'D4', f:2, d:500}, {note:'C4', f:1, d:250}, {note:'D4', f:2, d:750},
-                // Theme B
-                {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
-                {note:'D4', f:3, d:500}, {note:'F4', f:5, d:250}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500},
-                {note:'G4', f:1, d:500}, {note:'A4', f:2, d:250}, {note:'A#4', f:3, d:500}, {note:'A#4', f:3, d:500},
-                {note:'A4', f:2, d:500}, {note:'G4', f:1, d:250}, {note:'A4', f:2, d:750},
-                // Final puissant
-                {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
-                {note:'D4', f:3, d:500}, {note:'F4', f:5, d:250}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500},
-                {note:'E4', f:3, d:500}, {note:'F4', f:4, d:250}, {note:'D4', f:2, d:1500}
+                {note:'D4', f:2, d:500}, {note:'C4', f:1, d:250}, {note:'D4', f:2, d:750}
             ] 
         },
         { 
             titre: "Metallica - Nothing Else Matters", 
             diff: 'medium', 
             notes: [
-                // Arpège Intro (x2)
                 {note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200},
                 {note:'B3', f:3, d:400}, {note:'G3', f:2, d:400}, {note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, 
-                {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200},
-                // Chant principal
-                {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900},
-                {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900}, {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, 
-                {note:'C4', f:3, d:600}, {note:'G3', f:1, d:900}, {note:'A3', f:2, d:1200},
-                // Pont
-                {note:'A3', f:1, d:400}, {note:'B3', f:2, d:400}, {note:'C4', f:3, d:800},
-                {note:'B3', f:2, d:400}, {note:'A3', f:1, d:400}, {note:'G3', f:1, d:800},
-                {note:'E3', f:1, d:2000}
+                {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200}
             ] 
-        }
+        },
+        { titre: "ATC - All Around The World", diff: 'easy', notes: [
+            // Theme principal x2 avec variation
+            {note:'C4', d:300}, {note:'D4', d:300}, {note:'E4', d:300}, {note:'C4', d:300}, {note:'G4', d:600}, {note:'F4', d:600},
+            {note:'E4', d:300}, {note:'D4', d:300}, {note:'E4', d:300}, {note:'C4', d:300}, {note:'D4', d:600}, {note:'C4', d:600},
+            {note:'C4', d:300}, {note:'D4', d:300}, {note:'E4', d:300}, {note:'C4', d:300}, {note:'G4', d:600}, {note:'F4', d:600},
+            {note:'E4', d:300}, {note:'D4', d:300}, {note:'E4', d:300}, {note:'C4', d:300}, {note:'D4', d:300}, {note:'E4', d:300}, {note:'C4', d:1200}
+        ]},
+        { titre: "Eiffel 65 - Blue", diff: 'medium', notes: [
+            // Le célèbre riff "Da Be Dee" complet
+            {note:'G4', d:200}, {note:'A4', d:200}, {note:'B4', d:200}, {note:'D5', d:200}, {note:'E5', d:200}, {note:'G4', d:200}, {note:'A4', d:200}, {note:'B4', d:400},
+            {note:'G4', d:200}, {note:'A4', d:200}, {note:'B4', d:200}, {note:'D5', d:200}, {note:'E5', d:200}, {note:'G4', d:200}, {note:'A4', d:200}, {note:'B4', d:400},
+            {note:'E5', d:200}, {note:'D5', d:200}, {note:'B4', d:200}, {note:'A4', d:200}, {note:'G4', d:800}
+        ]},
+        { titre: "ABBA - Gimme! Gimme! Gimme!", diff: 'medium', notes: [
+            // Riff de synthé mythique rallongé
+            {note:'D4', d:200}, {note:'E4', d:200}, {note:'F4', d:200}, {note:'A4', d:400}, {note:'F4', d:200}, {note:'A4', d:400}, {note:'F4', d:200}, {note:'D4', d:600},
+            {note:'D4', d:200}, {note:'E4', d:200}, {note:'F4', d:200}, {note:'A4', d:400}, {note:'F4', d:200}, {note:'A4', d:400}, {note:'F4', d:200}, {note:'D4', d:400},
+            {note:'C4', d:200}, {note:'D4', d:200}, {note:'E4', d:200}, {note:'G4', d:400}, {note:'E4', d:200}, {note:'D4', d:800}
+        ]},
+        { titre: "Axel F (Beverly Hills Cop)", diff: 'hard', notes: [
+            // Thème complet avec le rebond
+            {note:'D4', d:400}, {note:'F4', d:300}, {note:'D4', d:200}, {note:'D4', d:150}, {note:'G4', d:200}, {note:'D4', d:200}, {note:'C4', d:200},
+            {note:'D4', d:400}, {note:'A4', d:300}, {note:'D4', d:200}, {note:'D4', d:150}, {note:'A#4', d:200}, {note:'A4', d:200}, {note:'F4', d:200},
+            {note:'D4', d:200}, {note:'A4', d:200}, {note:'D5', d:200}, {note:'D4', d:150}, {note:'C4', d:150}, {note:'C4', d:150}, {note:'E4', d:150}, {note:'D4', d:800}
+        ]},
+        { titre: "a-ha - Take On Me", diff: 'hard', notes: [
+            // Refrain complet (notes hautes)
+            {note:'B3', d:200}, {note:'B3', d:200}, {note:'E4', d:200}, {note:'A4', d:200}, {note:'A4', d:200}, {note:'G#4', d:200}, {note:'E4', d:200},
+            {note:'G#4', d:200}, {note:'G#4', d:200}, {note:'G#4', d:200}, {note:'E4', d:200}, {note:'D4', d:200}, {note:'E4', d:200}, {note:'G#4', d:200},
+            {note:'A4', d:200}, {note:'A4', d:200}, {note:'A4', d:200}, {note:'E4', d:200}, {note:'B4', d:400}, {note:'A4', d:800}
+        ]},
+        { titre: "O-Zone - Dragostea Din Tei", diff: 'medium', notes: [
+            // "Ma-ia-hii, Ma-ia-huu" complet
+            {note:'B4', d:300}, {note:'A4', d:300}, {note:'G4', d:300}, {note:'A4', d:300}, {note:'B4', d:300}, {note:'B4', d:300}, {note:'B4', d:600},
+            {note:'A4', d:300}, {note:'G4', d:300}, {note:'A4', d:300}, {note:'A4', d:300}, {note:'A4', d:300}, {note:'A4', d:600},
+            {note:'G4', d:300}, {note:'F#4', d:300}, {note:'E4', d:300}, {note:'E4', d:300}, {note:'E4', d:300}, {note:'E4', d:600}
+        ]},
+        { titre: "Gigi D'Agostino - L'Amour Toujours", diff: 'hard', notes: [
+            // Le riff épique répété
+            {note:'A4', d:200}, {note:'G4', d:200}, {note:'A4', d:200}, {note:'E4', d:400}, {note:'D4', d:400}, {note:'C4', d:400},
+            {note:'A4', d:200}, {note:'G4', d:200}, {note:'A4', d:200}, {note:'E4', d:400}, {note:'D4', d:400}, {note:'C4', d:400},
+            {note:'E4', d:200}, {note:'D4', d:200}, {note:'E4', d:200}, {note:'C4', d:400}, {note:'B3', d:400}, {note:'A3', d:800}
+        ]},
+        { titre: "Rick Astley - Never Gonna Give You Up", diff: 'medium', notes: [
+            // Le refrain complet (Rick Roll permanent)
+            {note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'A4', d:600}, {note:'A4', d:200}, {note:'G4', d:800},
+            {note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'G4', d:600}, {note:'G4', d:200}, {note:'F4', d:400}, {note:'E4', d:200}, {note:'D4', d:400},
+            {note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'F4', d:600}, {note:'G4', d:200}, {note:'E4', d:400}, {note:'D4', d:200}, {note:'C4', d:800}
+        ]}
+        
     ]
-
 };
 
 let audioContext, notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
@@ -358,12 +381,21 @@ function startGame(data, mode) {
     next();
 }
 function quitGame() {
-    // On arrête tout ici aussi pour être sûr
+    // 1. On stoppe immédiatement le délai de la prochaine note
     clearTimeout(gameLoopTimeout);
-    document.getElementById('main-menu').style.display='block'; 
-    document.getElementById('game-container').style.display='none'; 
+    
+    // 2. On change l'affichage
+    document.getElementById('main-menu').style.display = 'block'; 
+    document.getElementById('game-container').style.display = 'none'; 
+    
+    // 3. On nettoie visuellement et techniquement
     document.getElementById('fall-zone').innerHTML = '';
     notesOnScreen = []; 
+    
+    // 4. On force la mise en pause pour stopper les boucles d'animation requestAnimationFrame
+    isPaused = true;
+    
+    console.log("Jeu arrêté et sons nettoyés.");
 }
 function updateProfileDisplay() {
     const list = document.getElementById('profiles-list'); list.innerHTML = '';
@@ -394,8 +426,22 @@ function closeProfileModal() { document.getElementById('profile-modal').style.di
 function quitGame() { document.getElementById('main-menu').style.display='block'; document.getElementById('game-container').style.display='none'; notesOnScreen = []; }
 function saveProgress(t) { if(!completedLevels.includes(t)) { completedLevels.push(t); localStorage.setItem('pk_completed', JSON.stringify(completedLevels)); } }
 function getFreq(n) { const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]; return 440 * Math.pow(2, (notes.indexOf(n.slice(0,-1)) + (parseInt(n.slice(-1)) - 4) * 12 - 9) / 12); }
-function playNoteSound(f) { if(!audioContext) audioContext = new AudioContext(); const o = audioContext.createOscillator(), g = audioContext.createGain(); o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1); o.connect(g); g.connect(audioContext.destination); o.start(); o.stop(audioContext.currentTime + 1); }
+function playNoteSound(f) { 
+    if(!audioContext) audioContext = new AudioContext();
+    
+    // Si l'audio est suspendu (souvent par le navigateur), on le relance
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 
+    const o = audioContext.createOscillator(), g = audioContext.createGain(); 
+    o.frequency.value = f; 
+    g.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1); 
+    o.connect(g); 
+    g.connect(audioContext.destination); 
+    o.start(); 
+    o.stop(audioContext.currentTime + 1); 
+}
 async function toggleMic() {
     const btn = document.getElementById('mic-toggle');
     if (!isMicActive) {
