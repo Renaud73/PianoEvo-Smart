@@ -64,21 +64,23 @@ apprentissage: [
             ] 
         },
         { 
-            titre: "Pirates des Caraïbes (Extended)", 
-            diff: 'hard', 
-            notes: [
-                // Thème A
-                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:300}, {note:'D4', f:3, d:600}, {note:'D4', f:3, d:600},
-                {note:'D4', f:3, d:600}, {note:'E4', f:4, d:300}, {note:'F4', f:5, d:600}, {note:'F4', f:5, d:600},
-                {note:'F4', f:5, d:600}, {note:'G4', f:4, d:300}, {note:'E4', f:3, d:600}, {note:'E4', f:3, d:600},
-                {note:'D4', f:2, d:600}, {note:'C4', f:1, d:300}, {note:'D4', f:2, d:900},
-                // Thème B (plus haut)
-                {note:'A3', f:1, d:600}, {note:'C4', f:2, d:300}, {note:'D4', f:3, d:600}, {note:'D4', f:3, d:600},
-                {note:'D4', f:3, d:600}, {note:'F4', f:5, d:300}, {note:'G4', f:1, d:600}, {note:'G4', f:1, d:600},
-                {note:'G4', f:1, d:600}, {note:'A4', f:2, d:300}, {note:'A#4', f:3, d:600}, {note:'A#4', f:3, d:600},
-                {note:'A4', f:2, d:600}, {note:'G4', f:1, d:300}, {note:'A4', f:2, d:1200}
-            ] 
-        },
+    titre: "Pirates des Caraïbes (Version Longue)", 
+    diff: 'hard', 
+    notes: [
+        // --- Thème Principal (Intro) ---
+        {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
+        {note:'D4', f:3, d:500}, {note:'E4', f:4, d:250}, {note:'F4', f:5, d:500}, {note:'F4', f:5, d:500},
+        {note:'F4', f:5, d:500}, {note:'G4', f:4, d:250}, {note:'E4', f:3, d:500}, {note:'E4', f:3, d:500},
+        {note:'D4', f:2, d:500}, {note:'C4', f:1, d:250}, {note:'D4', f:2, d:750},
+
+        // --- Thème B (Variation) ---
+        {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
+        {note:'D4', f:3, d:500}, {note:'F4', f:5, d:250}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500},
+        {note:'G4', f:1, d:500}, {note:'A4', f:2, d:250}, {note:'A#4', f:3, d:500}, {note:'A#4', f:3, d:500},
+        {note:'A4', f:2, d:500}, {note:'G4', f:1, d:250}, {note:'A4', f:2, d:750},
+
+           ] 
+},
          { 
     titre: "Axel F - Beverly Hills Cop (Long)", 
     diff: 'hard', 
@@ -140,16 +142,29 @@ musique: [
                 {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'C4', f:1, d:1500}
             ] 
         },
-        { 
-            titre: "Pirates des Caraïbes (Full)", 
-            diff: 'hard', 
-            notes: [
-                {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
-                {note:'D4', f:3, d:500}, {note:'E4', f:4, d:250}, {note:'F4', f:5, d:500}, {note:'F4', f:5, d:500},
-                {note:'F4', f:5, d:500}, {note:'G4', f:4, d:250}, {note:'E4', f:3, d:500}, {note:'E4', f:3, d:500},
-                {note:'D4', f:2, d:500}, {note:'C4', f:1, d:250}, {note:'D4', f:2, d:750}
-            ] 
-        },
+       { 
+    titre: "Pirates des Caraïbes (Version Longue)", 
+    diff: 'hard', 
+    notes: [
+        // --- Thème Principal (Intro) ---
+        {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
+        {note:'D4', f:3, d:500}, {note:'E4', f:4, d:250}, {note:'F4', f:5, d:500}, {note:'F4', f:5, d:500},
+        {note:'F4', f:5, d:500}, {note:'G4', f:4, d:250}, {note:'E4', f:3, d:500}, {note:'E4', f:3, d:500},
+        {note:'D4', f:2, d:500}, {note:'C4', f:1, d:250}, {note:'D4', f:2, d:750},
+
+        // --- Thème B (Variation) ---
+        {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500},
+        {note:'D4', f:3, d:500}, {note:'F4', f:5, d:250}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500},
+        {note:'G4', f:1, d:500}, {note:'A4', f:2, d:250}, {note:'A#4', f:3, d:500}, {note:'A#4', f:3, d:500},
+        {note:'A4', f:2, d:500}, {note:'G4', f:1, d:250}, {note:'A4', f:2, d:750},
+
+        // --- LE FINAL (Nouveau) ---
+        {note:'A4', f:1, d:250}, {note:'A4', f:1, d:250}, {note:'A4', f:1, d:500}, 
+        {note:'A#4', f:2, d:250}, {note:'A#4', f:2, d:250}, {note:'A#4', f:2, d:500},
+        {note:'C5', f:3, d:250}, {note:'D5', f:4, d:250}, {note:'E5', f:5, d:500},
+        {note:'D5', f:4, d:250}, {note:'C5', f:3, d:250}, {note:'D5', f:4, d:1500}
+    ] 
+},
         { 
             titre: "Metallica - Nothing Else Matters", 
             diff: 'medium', 
@@ -501,18 +516,47 @@ async function toggleMic() {
     const btn = document.getElementById('mic-toggle');
     if (!isMicActive) {
         try {
-            microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            isMicActive = true; btn.textContent = "🎤 Micro ON"; btn.classList.add('mic-active');
-            if(!audioContext) audioContext = new AudioContext();
+            // Ajout des contraintes anti-écho et anti-bruit
+            microphoneStream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true, // Désactive l'écho des haut-parleurs
+                    noiseSuppression: true, // Réduit le bruit de fond
+                    autoGainControl: false  // Évite que le volume change tout seul
+                } 
+            });
+
+            isMicActive = true;
+            btn.textContent = "🎤 Micro ON";
+            btn.classList.add('mic-active');
+
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const source = audioContext.createMediaStreamSource(microphoneStream);
-            audioAnalyser = audioContext.createAnalyser(); audioAnalyser.fftSize = 2048;
+            audioAnalyser = audioContext.createAnalyser();
+            audioAnalyser.fftSize = 2048;
             source.connect(audioAnalyser);
-            const detect = () => { if(!isMicActive) return; audioAnalyser.getFloatTimeDomainData(pitchBuffer); let f = autoCorrelate(pitchBuffer, audioContext.sampleRate); if(f !== -1) { let n = getNoteFromFreq(f); if(n) handleKeyPress(n); } requestAnimationFrame(detect); };
+
+            const detect = () => {
+                if (!isMicActive) return;
+                audioAnalyser.getFloatTimeDomainData(pitchBuffer);
+                let f = autoCorrelate(pitchBuffer, audioContext.sampleRate);
+                if (f !== -1) {
+                    let n = getNoteFromFreq(f);
+                    if (n) handleKeyPress(n);
+                }
+                requestAnimationFrame(detect);
+            };
             detect();
-        } catch (err) { alert("Micro non activé."); }
+        } catch (err) {
+            console.error(err);
+            alert("Micro non activé ou non supporté.");
+        }
     } else {
-        isMicActive = false; btn.textContent = "🎤 Micro OFF"; btn.classList.remove('mic-active');
-        if(microphoneStream) microphoneStream.getTracks().forEach(t => t.stop());
+        isMicActive = false;
+        btn.textContent = "🎤 Micro OFF";
+        btn.classList.remove('mic-active');
+        if (microphoneStream) {
+            microphoneStream.getTracks().forEach(t => t.stop());
+        }
     }
 }
 
