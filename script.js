@@ -78,7 +78,34 @@ apprentissage: [
                 {note:'G4', f:1, d:600}, {note:'A4', f:2, d:300}, {note:'A#4', f:3, d:600}, {note:'A#4', f:3, d:600},
                 {note:'A4', f:2, d:600}, {note:'G4', f:1, d:300}, {note:'A4', f:2, d:1200}
             ] 
-        }
+        },
+         { 
+    titre: "Axel F - Beverly Hills Cop (Long)", 
+    diff: 'hard', 
+    notes: [
+        // --- PREMIÈRE PARTIE ---
+        {note:'D4', f:1, m:'D', d:400}, {note:'F4', f:3, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'G4', f:4, m:'D', d:200}, {note:'D4', f:1, m:'D', d:200}, {note:'C4', f:1, m:'D', d:200},
+        
+        {note:'D4', f:1, m:'D', d:400}, {note:'A4', f:5, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'A#4', f:5, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'F4', f:2, m:'D', d:200},
+        
+        {note:'D4', f:1, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'D5', f:5, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'C4', f:1, m:'D', d:150}, {note:'C4', f:1, m:'D', d:150}, 
+        {note:'E4', f:2, m:'D', d:150}, {note:'D4', f:1, m:'D', d:600},
+
+        // --- DEUXIÈME PARTIE (REPRISE) ---
+        {note:'D4', f:1, m:'D', d:400}, {note:'F4', f:3, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'G4', f:4, m:'D', d:200}, {note:'D4', f:1, m:'D', d:200}, {note:'C4', f:1, m:'D', d:200},
+        
+        // Final avec rebond rapide pour finir en beauté
+        {note:'D4', f:1, m:'D', d:400}, {note:'A4', f:5, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'A#4', f:5, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'F4', f:2, m:'D', d:200},
+        
+        {note:'D4', f:1, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'D5', f:5, m:'D', d:400}, 
+        {note:'C5', f:4, m:'D', d:200}, {note:'A4', f:3, m:'D', d:200}, {note:'G4', f:2, m:'D', d:200}, {note:'D4', f:1, m:'D', d:1000}
+    ] 
+}
     ],
 musique: [
         { 
@@ -151,12 +178,33 @@ musique: [
             {note:'D4', d:200}, {note:'E4', d:200}, {note:'F4', d:200}, {note:'A4', d:400}, {note:'F4', d:200}, {note:'A4', d:400}, {note:'F4', d:200}, {note:'D4', d:400},
             {note:'C4', d:200}, {note:'D4', d:200}, {note:'E4', d:200}, {note:'G4', d:400}, {note:'E4', d:200}, {note:'D4', d:800}
         ]},
-        { titre: "Axel F (Beverly Hills Cop)", diff: 'hard', notes: [
-            // Thème complet avec le rebond
-            {note:'D4', d:400}, {note:'F4', d:300}, {note:'D4', d:200}, {note:'D4', d:150}, {note:'G4', d:200}, {note:'D4', d:200}, {note:'C4', d:200},
-            {note:'D4', d:400}, {note:'A4', d:300}, {note:'D4', d:200}, {note:'D4', d:150}, {note:'A#4', d:200}, {note:'A4', d:200}, {note:'F4', d:200},
-            {note:'D4', d:200}, {note:'A4', d:200}, {note:'D5', d:200}, {note:'D4', d:150}, {note:'C4', d:150}, {note:'C4', d:150}, {note:'E4', d:150}, {note:'D4', d:800}
-        ]},
+        { 
+    titre: "Axel F - Beverly Hills Cop (Long)", 
+    diff: 'hard', 
+    notes: [
+        // --- PREMIÈRE PARTIE ---
+        {note:'D4', f:1, m:'D', d:400}, {note:'F4', f:3, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'G4', f:4, m:'D', d:200}, {note:'D4', f:1, m:'D', d:200}, {note:'C4', f:1, m:'D', d:200},
+        
+        {note:'D4', f:1, m:'D', d:400}, {note:'A4', f:5, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'A#4', f:5, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'F4', f:2, m:'D', d:200},
+        
+        {note:'D4', f:1, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'D5', f:5, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'C4', f:1, m:'D', d:150}, {note:'C4', f:1, m:'D', d:150}, 
+        {note:'E4', f:2, m:'D', d:150}, {note:'D4', f:1, m:'D', d:600},
+
+        // --- DEUXIÈME PARTIE (REPRISE) ---
+        {note:'D4', f:1, m:'D', d:400}, {note:'F4', f:3, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'G4', f:4, m:'D', d:200}, {note:'D4', f:1, m:'D', d:200}, {note:'C4', f:1, m:'D', d:200},
+        
+        // Final avec rebond rapide pour finir en beauté
+        {note:'D4', f:1, m:'D', d:400}, {note:'A4', f:5, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, 
+        {note:'D4', f:1, m:'D', d:150}, {note:'A#4', f:5, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'F4', f:2, m:'D', d:200},
+        
+        {note:'D4', f:1, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'D5', f:5, m:'D', d:400}, 
+        {note:'C5', f:4, m:'D', d:200}, {note:'A4', f:3, m:'D', d:200}, {note:'G4', f:2, m:'D', d:200}, {note:'D4', f:1, m:'D', d:1000}
+    ] 
+},
         { titre: "a-ha - Take On Me", diff: 'hard', notes: [
             // Refrain complet (notes hautes)
             {note:'B3', d:200}, {note:'B3', d:200}, {note:'E4', d:200}, {note:'A4', d:200}, {note:'A4', d:200}, {note:'G#4', d:200}, {note:'E4', d:200},
@@ -239,7 +287,6 @@ function switchTab(tabType) {
     
     // 1. Gérer l'illumination des boutons (les onglets)
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        // On récupère l'attribut onclick pour savoir quel type il déclenche
         const onclickAttr = btn.getAttribute('onclick');
         if (onclickAttr && onclickAttr.includes(`'${tabType}'`)) {
             btn.classList.add('active');
@@ -248,7 +295,7 @@ function switchTab(tabType) {
         }
     });
 
-    // 2. Charger le contenu depuis DATA
+    // 2. Charger le contenu depuis DATA sans le logo de validation
     const items = DATA[tabType] || [];
     items.forEach(item => {
         const c = document.createElement('div'); 
@@ -256,13 +303,11 @@ function switchTab(tabType) {
         c.innerHTML = `
             <div style="display:flex; justify-content:space-between; font-size:10px;">
                 <b class="diff-${item.diff}">${item.diff.toUpperCase()}</b>
-                ${completedLevels.includes(item.titre) ? '✅' : ''}
-            </div>
+                </div>
             <div style="margin-top:5px; font-weight:bold;">${item.titre}</div>
         `;
        c.onclick = () => { 
             currentLevelTitle = item.titre; 
-            // Si l'onglet est 'musique', on lance en mode auto, sinon en mode step
             const mode = (tabType === 'musique') ? 'auto' : 'step';
             startGame(item, mode); 
         };
@@ -348,7 +393,17 @@ function drop(nData) {
         }
     }; animate();
 }
-
+function setSpeed(val, btn) {
+    gameSpeed = val;
+    
+    // On retire la classe 'active' de tous les boutons de vitesse
+    document.querySelectorAll('.speed-controls button').forEach(b => b.classList.remove('active'));
+    
+    // On l'ajoute au bouton sur lequel on vient de cliquer
+    if(btn) btn.classList.add('active');
+    
+    console.log("Vitesse réglée à : " + val);
+}
 function startGame(data, mode) {
     // 1. ARRÊT TOTAL de la boucle précédente
     clearTimeout(gameLoopTimeout);
