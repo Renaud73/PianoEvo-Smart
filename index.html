@@ -14,6 +14,7 @@
                 <button onclick="openProfileModal()" class="profile-trigger">
                     👤 <span id="display-username">Apprenti</span>
                 </button>
+                <button onclick="toggleColorMode()" id="color-mode-btn">🎨 Debutant</button>
                 <button onclick="toggleFullScreen()" id="fs-btn">🖥️</button>
             </div>
             <button id="mic-toggle">🎤 Micro OFF</button>
@@ -34,7 +35,11 @@
     <div id="game-container" style="display:none;">
         <div id="progress-container"><div id="progress-inner"></div></div>
         <button class="btn-close" onclick="quitGame()">❌ QUITTER</button>
-        
+        <div class="speed-controls">
+    <button onclick="setSpeed(1.7)">Lent🐢</button>
+    <button onclick="setSpeed(1)">Normal🚶</button>
+    <button onclick="setSpeed(0.7)">Rapide⚡</button>
+</div>
         <div id="game-layout">
             <div class="finger-guide-side left">
                 <div class="hand-flat left-hand">
@@ -72,15 +77,19 @@
         <div class="modal-content">
             <h3>Mes Profils</h3>
             <div id="profiles-list"></div>
-            <div class="add-profile-box">
-                <input type="text" id="input-username" placeholder="Prénom">
-                <button onclick="createNewProfile()" class="btn-add">OK</button>
-            </div>
+            <div class="add-profile-box" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+    <input type="text" id="input-username" placeholder="Ton prénom..." style="width: 100%; box-sizing: border-box;">
+    
+    <div style="font-size: 0.9rem; color: #888; margin-bottom: -5px;">Choisis ton icône :</div>
+    <div id="emoji-picker">
+        </div>
+
+    <button onclick="createNewProfile()" class="btn-add" style="width: 100%;">CRÉER MON PROFIL</button>
+</div>
             <button onclick="closeProfileModal()" class="btn-secondary">RETOUR</button>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
-</html>
 </html>
