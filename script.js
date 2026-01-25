@@ -100,10 +100,18 @@ function setupEmojiPicker() {
 
 // --- LOGIQUE SÉLECTEUR RÔLE ---
 function setRole(role) {
-    selectedRole = role;
-    document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
-    if(role === 'enfant') document.getElementById('role-enfant').classList.add('active');
-    else document.getElementById('role-adulte').classList.add('active');
+    selectedRole = role; // Met à jour la variable globale
+    
+    // On retire la classe 'active' des deux boutons
+    document.getElementById('role-enfant').classList.remove('active');
+    document.getElementById('role-adulte').classList.remove('active');
+    
+    // On ajoute la classe 'active' au bouton cliqué
+    if (role === 'enfant') {
+        document.getElementById('role-enfant').classList.add('active');
+    } else {
+        document.getElementById('role-adulte').classList.add('active');
+    }
 }
 
 function toggleFullScreen() {
