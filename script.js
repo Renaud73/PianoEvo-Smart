@@ -2,7 +2,18 @@ const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#",
 const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', 'A': 'LA', 'B': 'SI' };
 const noteColors = { 'C': '#FF0000', 'D': '#FF7F00', 'E': '#FFFF00', 'F': '#00FF00', 'G': '#0000FF', 'A': '#4B0082', 'B': '#8B00FF' };
 let gameLoopTimeout;
+let currentSpeed = 4; // Vitesse par défaut
 
+function setSpeed(v) {
+    currentSpeed = v;
+    console.log("Nouvelle vitesse :", currentSpeed);
+    
+    // Optionnel : change l'apparence des boutons pour montrer lequel est actif
+    document.querySelectorAll('.speed-controls button').forEach(b => {
+        b.classList.remove('active');
+    });
+    // On cherche le bouton qui a la valeur cliquée pour lui mettre la classe 'active'
+}
 // --- AJOUT VARIABLES EMOJI ET RÔLE ---
 const availableEmojis = ['🎹', '🎸', '🐱', '🚀', '⭐', '🌈', '🎨', '🎧', '🍦', '🎮'];
 let selectedEmoji = '🎹'; 
@@ -178,7 +189,33 @@ function switchTab(tabType) {
 function handleKeyPress(note) {
     const k = document.querySelector(`.key[data-note="${note}"]`);
     if(k) { 
-        k.classList.add('active'); setTimeout(()=>k.classList.remove('active'), 200);
+        // --- SYNC DES TOUCHES AVEC LE STYLE ---
+        if (colorMode === 'expert') {
+            // Style LAVE (Orange/Rouge)
+            k.style.background = "linear-gradient(to bottom, #ff8c00, #ff0000)";
+            k.style.boxShadow = "0 0 30px #ff4500, 0 0 10px #ff0000";
+            k.style.border = "2px solid #ffd700";
+        } else if (colorMode === 'intermediaire') {
+            // Style ÉCLAIR (Blanc/Cyan)
+            k.style.background = "linear-gradient(to bottom, #ffffff, #00ffff)";
+            k.style.boxShadow = "0 0 20px #00ffff, 0 0 40px #ffffff";
+            k.style.border = "2px solid #e0ffff";
+        } else {
+            // Style DÉBUTANT (Couleurs arc-en-ciel)
+            const color = noteColors[note.replace(/[0-9#]/g, '')] || '#00f2ff';
+            k.style.backgroundColor = color;
+            k.style.boxShadow = `0 0 20px ${color}`;
+        }
+
+        // On retire le style après 200ms
+        setTimeout(() => {
+            k.style.background = "";
+            k.style.backgroundColor = "";
+            k.style.boxShadow = "";
+            k.style.border = "";
+        }, 200);
+
+        // --- Logique de validation des notes (Reste inchangée) ---
         const t = notesOnScreen.find(n => n.note === note && !n.ok);
         if(t) {
             t.ok = true; notesValidated++;
@@ -190,67 +227,92 @@ function handleKeyPress(note) {
             }
             isPaused = false; playNoteSound(getFreq(note));
             
-            // --- C'EST ICI QUE ÇA SE PASSE ---
             if(notesValidated === totalNotesInLevel) { 
                 saveProgress(currentLevelTitle); 
-                setTimeout(() => { 
-                    alert("Bravo !"); 
-                    quitGame(); 
-                    // On force le menu à se rafraîchir pour enlever les cadenas
-                    const activeTab = document.querySelector('.tab-btn.active');
-                    if(activeTab) {
-                        const tabType = activeTab.getAttribute('onclick').match(/'([^']+)'/)[1];
-                        switchTab(tabType);
-                    }
-                }, 500); 
+                setTimeout(() => { alert("Bravo !"); quitGame(); }, 500); 
             }
-            // --------------------------------
-            
         } else { playNoteSound(getFreq(note)); }
     }
 }
 
 function createExplosion(x, y, color) {
     const fZone = document.getElementById('fall-zone');
+    const isExpert = (colorMode === 'expert');
+    
+    // Onde de choc plus grande
     const shock = document.createElement('div');
     shock.className = 'shockwave';
-    shock.style.left = x + 'px'; shock.style.top = y + 'px'; shock.style.boxShadow = `0 0 30px ${color}`;
+    shock.style.left = x + 'px'; shock.style.top = y + 'px'; 
+    shock.style.boxShadow = `0 0 ${isExpert ? '80px' : '30px'} ${isExpert ? '#ff00ff' : color}`;
+    if(isExpert) shock.style.transform = 'translate(-50%, -50%) scale(2)';
+    
     fZone.appendChild(shock); setTimeout(() => shock.remove(), 400);
 
-    for (let i = 0; i < 12; i++) {
+    // Plus de particules en mode Expert (30 au lieu de 12)
+    const particleCount = isExpert ? 30 : 12;
+    for (let i = 0; i < particleCount; i++) {
         const p = document.createElement('div');
         p.className = 'spark-particle';
-        p.style.backgroundColor = '#fff'; p.style.boxShadow = `0 0 8px ${color}`;
+      // Effet d'explosion de lave
+p.style.background = "radial-gradient(circle, #ffd700, #ff4500, #ff0000)";
+p.style.boxShadow = "0 0 40px #ff4500, 0 0 80px #ff0000";
+p.style.transform = "scale(1.2)"; // La touche "gonfle" un peu sous la chaleur
+p.style.transition = "all 0.1s ease-out";
+        p.style.boxShadow = `0 0 12px ${isExpert ? '#00f2ff' : color}`;
         p.style.left = x + 'px'; p.style.top = y + 'px';
-        const angle = Math.random() * Math.PI * 2, speed = 60 + Math.random() * 100;
+        
+        // Vitesse beaucoup plus rapide pour l'effet "explosion"
+        const angle = Math.random() * Math.PI * 2;
+        const speed = isExpert ? (150 + Math.random() * 200) : (60 + Math.random() * 100);
+        
         p.style.setProperty('--angle', `${angle}rad`);
         p.style.setProperty('--vx', `${Math.cos(angle) * speed}px`);
         p.style.setProperty('--vy', `${Math.sin(angle) * speed}px`);
-        fZone.appendChild(p); setTimeout(() => p.remove(), 600);
+        fZone.appendChild(p); setTimeout(() => p.remove(), 800);
     }
 }
 
 function drop(nData) {
-    const fZone = document.getElementById('fall-zone'), k = document.querySelector(`.key[data-note="${nData.note}"]`);
-    if(!k) return;
-    const id = Math.random(), o = { ...nData, y: -100, ok: false, id: id, h: 70 };
-    notesOnScreen.push(o);
-    const el = document.createElement('div'); el.className = 'falling-note'; el.id = "n-"+id;
-    el.style.width = k.offsetWidth + "px"; el.style.height = o.h + "px"; el.style.left = k.offsetLeft + "px";
+    const fZone = document.getElementById('fall-zone');
     
-    if (currentMode === 'auto') {
-        el.style.background = `linear-gradient(to bottom, #00f2ff, #ffffff)`;
-        el.style.boxShadow = `0 0 20px #00f2ff, inset 0 0 10px #00f2ff`;
-        el.style.borderColor = "#ffffff";
+    // 1. Trouver la touche correspondante
+    const targetKey = document.querySelector(`.key[data-note="${nData.note}"]`);
+    
+    if(!targetKey) return;
+
+    const id = Math.random();
+    const o = { ...nData, y: -100, ok: false, id: id, h: 70 };
+    notesOnScreen.push(o);
+
+    const el = document.createElement('div');
+    el.className = 'falling-note';
+    el.id = "n-"+id;
+
+    // --- CORRECTION DU DÉCALAGE ---
+    // targetKey.offsetLeft est la position EXACTE calculée dans ton initPiano
+    el.style.left = targetKey.offsetLeft + "px"; 
+    el.style.width = targetKey.offsetWidth + "px"; 
+    el.style.height = o.h + "px";
+
+    // --- STYLE SELON LE MODE ---
+    if (colorMode === 'expert') {
+       el.style.background = "linear-gradient(to bottom, #ff8c00, #ff0000)";
+       el.style.boxShadow = "0 0 30px #ff4500";
+       el.style.border = "2px solid #ffd700";
+    } else if (colorMode === 'intermediaire') {
+        el.style.background = "linear-gradient(to bottom, #ffffff, #00ffff)";
+        el.style.boxShadow = "0 0 20px #00ffff";
     } else {
-        el.style.background = `linear-gradient(to bottom, ${noteColors[o.note.replace(/[0-9#]/g, '')] || '#00f2ff'}, #fff)`;
+        const baseColor = noteColors[o.note.replace(/[0-9#]/g, '')] || '#00f2ff';
+        el.style.background = `linear-gradient(to bottom, ${baseColor}, #fff)`;
     }
 
-    if (o.f) { 
+    if (o.f && colorMode !== 'expert') { 
         const ind = document.createElement('div'); 
         ind.className = 'finger-indicator ' + (o.m === 'G' ? 'finger-left' : 'finger-right'); 
         ind.textContent = o.f; el.appendChild(ind); 
     }
+    
     fZone.appendChild(el);
 
     const animate = () => {
@@ -261,7 +323,8 @@ function drop(nData) {
         el.style.top = o.y + "px";
         if(o.y < fZone.offsetHeight + 100 && document.getElementById("n-"+id)) requestAnimationFrame(animate);
         else el.remove();
-    }; animate();
+    }; 
+    animate();
 }
 
 function startGame(data, mode) {
@@ -288,7 +351,18 @@ function quitGame() {
     document.getElementById('main-menu').style.display = 'block'; 
     document.getElementById('game-container').style.display = 'none'; 
     document.getElementById('fall-zone').innerHTML = '';
-    notesOnScreen = []; isPaused = true;
+    notesOnScreen = []; 
+    isPaused = true;
+
+    // --- MISE À JOUR AUTOMATIQUE DU MENU ---
+    // On récupère l'onglet qui était ouvert (cours, exercices ou musique)
+    const activeTabBtn = document.querySelector('.tab-btn.active');
+    if (activeTabBtn) {
+        // On récupère le type d'onglet depuis l'attribut onclick
+        // Exemple: switchTab('cours') -> on extrait 'cours'
+        const tabType = activeTabBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+        switchTab(tabType); 
+    }
 }
 
 function updateProfileDisplay() {
@@ -387,13 +461,23 @@ function getNoteFromFreq(f) {
     return noteStrings[Math.round(n)%12] + (Math.floor(Math.round(n)/12)-1);
 }
 
-let isMonoColor = false;
+let colorMode = 'debutant'; // Peut être 'debutant', 'intermediaire', ou 'expert'
+
 function toggleColorMode() {
-    isMonoColor = !isMonoColor;
     const btn = document.getElementById('color-mode-btn');
-    if (isMonoColor) {
-        document.body.classList.add('mono-color'); btn.innerHTML = '⚪ <span>Intermediaire</span>';
+    if (colorMode === 'debutant') {
+        colorMode = 'intermediaire';
+        btn.textContent = "🎨 Intermédiaire";
+        btn.style.color = "var(--medium)";
+    } else if (colorMode === 'intermediaire') {
+        colorMode = 'expert';
+        btn.textContent = "🔥 EXPERT";
+        btn.style.color = "#ff00ff"; // Rose/Violet électrique
+        btn.classList.add('expert-glow');
     } else {
-        document.body.classList.remove('mono-color'); btn.innerHTML = '🎨 <span>Debutant</span>';
+        colorMode = 'debutant';
+        btn.textContent = "🎨 Débutant";
+        btn.style.color = "var(--accent)";
+        btn.classList.remove('expert-glow');
     }
 }
