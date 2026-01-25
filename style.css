@@ -557,24 +557,25 @@ body.mono-color .falling-note {
 /* Style des boutons de type de profil */
 .role-btn {
     flex: 1;
-    padding: 12px;
+    padding: 15px; /* Augmenté pour faciliter le clic tactile */
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid #444;
     color: white;
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.85rem;
+    font-size: 1rem; /* Un peu plus grand pour la lisibilité */
     font-weight: 500;
+    -webkit-tap-highlight-color: transparent; /* Supprime le flash bleu au clic sur Android/iOS */
+    touch-action: manipulation; /* Optimise la réactivité tactile */
 }
 
-/* Style quand le bouton est sélectionné (Enfant ou Adulte) */
+/* Style quand le bouton est sélectionné */
 .role-btn.active {
-    background: var(--accent);
-    color: #000;
-    border-color: var(--accent);
+    background: var(--accent) !important;
+    color: #000 !important;
+    border-color: white;
     font-weight: bold;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
 }
 
 /* Style des cartes de cours verrouillées (uniquement pour les profils enfants) */
