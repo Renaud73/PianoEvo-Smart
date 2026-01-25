@@ -543,4 +543,72 @@ body.mono-color .falling-note {
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+}/* --- NOUVEAUX STYLES : ROLES ET VERROUILLAGE --- */
+
+/* Conteneur des boutons Enfant/Adulte dans la modal */
+.role-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* --- NOUVEAUX STYLES : ROLES ET VERROUILLAGE --- */
+
+/* Style des boutons de type de profil */
+.role-btn {
+    flex: 1;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Style quand le bouton est sélectionné (Enfant ou Adulte) */
+.role-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+}
+
+/* Style des cartes de cours verrouillées (uniquement pour les profils enfants) */
+.card.locked {
+    opacity: 0.4;
+    filter: grayscale(1); /* Rend la carte grise */
+    cursor: not-allowed;
+    border: 1px dashed #555 !important;
+    pointer-events: none; /* Empêche le clic */
+}
+
+/* Animation douce pour le passage au survol sur les boutons de rôles */
+.role-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #666;
+}
+.edit-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.edit-btn:hover {
+    background: var(--accent);
+    transform: scale(1.1);
 }
