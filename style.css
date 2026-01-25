@@ -148,13 +148,21 @@ body.mono-color .falling-note {
 
 /* --- ZONE DE JEU (GARDÉE OPTIMISÉE) --- */
 #game-container { position: fixed; inset: 0; background: black; display: none; flex-direction: column; z-index: 2000; }
-#game-layout { flex-grow: 1; position: relative; display: flex; justify-content: center; }
+#game-layout { 
+    flex-grow: 1; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; /* Centre tout le contenu (zone + piano) sur le même axe */
+    position: relative;
+}
 
 #fall-zone { 
-    position: absolute; top: 0; bottom: 0; 
-    left: 50%; transform: translateX(-50%); 
+    position: relative; /* Change 'absolute' en 'relative' */
+    width: fit-content; /* Obligatoire pour coller à la taille du piano */
+    flex-grow: 1;
     background: linear-gradient(to bottom, transparent, rgba(0,242,255,0.05)); 
-    overflow: hidden; 
+    overflow: visible !important; 
+    /* Supprime le left: 50% et transform */
 }
 
 .finger-flat { color: transparent !important; } /* Cache les chiffres au milieu */
@@ -172,14 +180,22 @@ body.mono-color .falling-note {
 .falling-note { position: absolute; border-radius: 20px; border: 1px solid rgba(255,255,255,0.5); z-index: 10; }
 
 /* PIANO ET EFFETS */
-#piano-container { height: 180px; background: #0a0a0a; border-top: 3px solid #222; display: flex; justify-content: center; padding-top: 10px; }
+#piano-container { 
+    height: 180px; 
+    background: #0a0a0a; 
+    border-top: 3px solid #222; 
+    display: flex; 
+    justify-content: center; 
+    width: 100%; /* Prend toute la largeur pour centrer le piano */
+}
+
 #piano { 
     display: flex; 
     height: 100%; 
-    position: relative; /* Nécessaire pour les touches noires absolues */
-    padding: 0 20px;
+    position: relative; 
+    /* Retire le padding: 0 20px car il décale les touches par rapport à la zone */
+    padding: 0; 
 }
-
 .key.white { 
     width: 55px; 
     height: 95%; 
@@ -612,4 +628,85 @@ body.mono-color .falling-note {
 .edit-btn:hover {
     background: var(--accent);
     transform: scale(1.1);
+}
+/* Effet de lueur pour le bouton Expert */
+.expert-glow {
+    animation: rainbow-glow 2s infinite linear;
+    text-shadow: 0 0 10px #ff00ff;
+    border-color: #ff00ff !important;
+}
+
+@keyframes rainbow-glow {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+/* Particules d'explosion expert */
+.particle-expert {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 15px #00f2ff, 0 0 30px #ff00ff;
+    animation: explode 0.8s ease-out forwards;
+}
+
+@keyframes explode {
+    0% { transform: scale(1) translate(0, 0); opacity: 1; }
+    100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; }
+}
+/* S'assurer que la zone de chute est visible et bien positionnée */
+#fall-zone {
+    position: relative !important;
+    flex: 1;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4); /* Fond sombre pour faire ressortir la ligne */
+    overflow: visible !important;
+}
+
+/* La ligne brillante (Hit Line) */
+#hit-line {
+    display: block !important;
+    position: absolute !important;
+    bottom: 0 !important;      /* Fixée pile au bas de la zone de chute */
+    left: 0;
+    width: 100%;
+    height: 6px !important;    /* Une épaisseur bien visible */
+    background: #00f2ff !important; /* Ton bleu néon */
+    
+    /* Triple effet de brillance pour être sûr de la voir */
+    box-shadow: 0 0 10px #00f2ff, 
+                0 0 25px #00f2ff, 
+                0 0 40px #00f2ff !important;
+    
+    z-index: 9999 !important;  /* Passe devant les notes et le décor */
+    pointer-events: none;
+}
+/* Optionnel : L'animation de pulsation que tu aimais */
+#hit-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #00f2ff;
+    opacity: 0.4;
+    filter: blur(8px);
+    animation: line-pulse 2s infinite ease-in-out;
+}
+
+@keyframes line-pulse {
+    0%, 100% { opacity: 0.2; transform: scaleY(1); }
+    50% { opacity: 0.6; transform: scaleY(2); }
+}/* Effet quand une touche est pressée ou jouée par la musique */
+.key.active {
+    background: #00ffff !important;
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #ffffff !important;
+    border-color: #ffffff !important;
+}
+
+/* Si c'est une touche noire */
+.key.black.active {
+    background: var(--accent) !important;
+    box-shadow: 0 0 15px var(--accent) !important;
 }
