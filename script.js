@@ -351,23 +351,52 @@ function handleKeyPress(note) {
 
 function createExplosion(x, y, color) {
     const fZone = document.getElementById('fall-zone');
-    const shock = document.createElement('div');
-    shock.className = 'shockwave'; shock.style.left = x+'px'; shock.style.top = y+'px';
-    shock.style.borderColor = color; shock.style.boxShadow = `0 0 15px ${color}`;
-    fZone.appendChild(shock); setTimeout(() => shock.remove(), 400);
 
-    for (let i = 0; i < 15; i++) {
-        const p = document.createElement('div'); p.className = 'smoke-particle';
-        p.style.backgroundColor = color; p.style.left = x+'px'; p.style.top = y+'px';
-        p.style.boxShadow = `0 0 10px ${color}`;
-        const angle = (Math.random() * Math.PI) + Math.PI; 
-        const force = 30 + Math.random() * 60;
-        p.style.setProperty('--vx', `${Math.cos(angle)*force}px`);
-        p.style.setProperty('--vy', `${Math.sin(angle)*force - 50}px`);
-        fZone.appendChild(p); setTimeout(() => p.remove(), 1200);
+    // 1. Création du Flash / Onde de choc
+    const shock = document.createElement('div');
+    shock.className = 'shockwave';
+    shock.style.left = x + 'px';
+    shock.style.top = y + 'px';
+    shock.style.boxShadow = `0 0 30px ${color}`;
+    fZone.appendChild(shock);
+    setTimeout(() => shock.remove(), 400);
+
+    // 2. Génération des Étincelles (Rapides et directionnelles)
+    for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'spark-particle';
+        p.style.backgroundColor = '#fff'; // Cœur blanc pour l'éclat
+        p.style.boxShadow = `0 0 8px ${color}`;
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 60 + Math.random() * 100;
+        p.style.setProperty('--angle', `${angle}rad`);
+        p.style.setProperty('--vx', `${Math.cos(angle) * speed}px`);
+        p.style.setProperty('--vy', `${Math.sin(angle) * speed}px`);
+        
+        fZone.appendChild(p);
+        setTimeout(() => p.remove(), 600);
+    }
+
+    // 3. Génération de la Fumée (Expansion lente vers le haut)
+    for (let i = 0; i < 8; i++) {
+        const p = document.createElement('div');
+        p.className = 'smoke-particle';
+        p.style.backgroundColor = color;
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        
+        const vx = (Math.random() - 0.5) * 100;
+        const vy = -(Math.random() * 80 + 20); // Toujours vers le haut
+        p.style.setProperty('--vx', `${vx}px`);
+        p.style.setProperty('--vy', `${vy}px`);
+        
+        fZone.appendChild(p);
+        setTimeout(() => p.remove(), 1200);
     }
 }
-
 function drop(nData) {
     const fZone = document.getElementById('fall-zone'), k = document.querySelector(`.key[data-note="${nData.note}"]`);
     if(!k) return;
@@ -375,8 +404,21 @@ function drop(nData) {
     notesOnScreen.push(o);
     const el = document.createElement('div'); el.className = 'falling-note'; el.id = "n-"+id;
     el.style.width = k.offsetWidth + "px"; el.style.height = o.h + "px"; el.style.left = k.offsetLeft + "px";
-    el.style.background = `linear-gradient(to bottom, ${noteColors[o.note.replace(/[0-9#]/g, '')] || '#00f2ff'}, #fff)`;
     
+    // --- MODIFICATION ICI : STYLE TURQUOISE NÉON POUR LE MODE MUSIQUE ---
+    if (currentMode === 'auto') {
+        // Turquoise néon avec effet de lueur
+        el.style.background = `linear-gradient(to bottom, #00f2ff, #ffffff)`;
+        el.style.boxShadow = `0 0 20px #00f2ff, inset 0 0 10px #00f2ff`;
+        el.style.borderColor = "#ffffff";
+    } else {
+        // Couleurs classiques pour les cours et exercices
+        el.style.background = `linear-gradient(to bottom, ${noteColors[o.note.replace(/[0-9#]/g, '')] || '#00f2ff'}, #fff)`;
+        el.style.boxShadow = "none";
+        el.style.borderColor = "rgba(255,255,255,0.5)";
+    }
+    // -------------------------------------------------------------------
+
     if (o.f) { 
         const ind = document.createElement('div'); 
         ind.className = 'finger-indicator ' + (o.m === 'G' ? 'finger-left' : 'finger-right'); 
@@ -384,22 +426,18 @@ function drop(nData) {
     }
     fZone.appendChild(el);
 
+    // ... reste de la fonction animate() identique ...
     const animate = () => {
         if(!isPaused) o.y += 4;
         const hit = fZone.offsetHeight - o.h;
-
-        // --- LOGIQUE AUTOMATIQUE POUR LE MODE MUSIQUE ---
         if(currentMode === 'auto' && !o.ok && o.y >= hit) {
-            handleKeyPress(o.note); // Joue la note automatiquement
-            o.ok = true; // Empêche de la rejouer en boucle
+            handleKeyPress(o.note);
+            o.ok = true;
         }
-
-        // --- LOGIQUE PAUSE POUR LES AUTRES MODES ---
         if(currentMode === 'step' && !o.ok && o.y >= hit) { 
             isPaused = true; 
             o.y = hit; 
         }
-
         el.style.top = o.y + "px";
         if(o.y < fZone.offsetHeight + 100 && document.getElementById("n-"+id)) {
             requestAnimationFrame(animate);
@@ -561,7 +599,7 @@ async function toggleMic() {
 }
 
 function autoCorrelate(b, s) {
-    let rms = 0; for(let i=0;i<b.length;i++) rms += b[i]*b[i]; if(Math.sqrt(rms/b.length)<0.05) return -1;
+    let rms = 0; for(let i=0;i<b.length;i++) rms += b[i]*b[i]; if(Math.sqrt(rms/b.length)<0.15) return -1;
     let r1=0, r2=b.length-1, thres=0.2;
     for(let i=0;i<b.length/2;i++) if(Math.abs(b[i])<thres){r1=i;break;}
     for(let i=1;i<b.length/2;i++) if(Math.abs(b[b.length-i])<thres){r2=b.length-i;break;}
@@ -575,4 +613,22 @@ function autoCorrelate(b, s) {
 function getNoteFromFreq(f) {
     const n = 12 * (Math.log2(f / 440)) + 69; if(isNaN(n)) return null;
     return noteStrings[Math.round(n)%12] + (Math.floor(Math.round(n)/12)-1);
+}
+let isMonoColor = false;
+
+function toggleColorMode() {
+    isMonoColor = !isMonoColor;
+    const btn = document.getElementById('color-mode-btn');
+    
+    if (isMonoColor) {
+        document.body.classList.add('mono-color');
+        btn.innerHTML = '⚪ <span>Intermediaire</span>';
+        btn.style.borderColor = 'var(--accent)'; // Brillance bleue
+        btn.style.boxShadow = '0 0 10px rgba(0, 242, 255, 0.3)';
+    } else {
+        document.body.classList.remove('mono-color');
+        btn.innerHTML = '🎨 <span>Debutant</span>';
+        btn.style.borderColor = ''; // Retour au gris normal
+        btn.style.boxShadow = '';
+    }
 }
