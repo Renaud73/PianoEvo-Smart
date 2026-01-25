@@ -274,27 +274,22 @@ p.style.transition = "all 0.1s ease-out";
 
 function drop(nData) {
     const fZone = document.getElementById('fall-zone');
-    
-    // 1. Trouver la touche correspondante
     const targetKey = document.querySelector(`.key[data-note="${nData.note}"]`);
-    
     if(!targetKey) return;
 
     const id = Math.random();
+    // On utilise currentSpeed ici pour définir la vitesse de descente
     const o = { ...nData, y: -100, ok: false, id: id, h: 70 };
     notesOnScreen.push(o);
 
     const el = document.createElement('div');
     el.className = 'falling-note';
     el.id = "n-"+id;
-
-    // --- CORRECTION DU DÉCALAGE ---
-    // targetKey.offsetLeft est la position EXACTE calculée dans ton initPiano
     el.style.left = targetKey.offsetLeft + "px"; 
     el.style.width = targetKey.offsetWidth + "px"; 
     el.style.height = o.h + "px";
 
-    // --- STYLE SELON LE MODE ---
+    // ... (garde ton bloc de style expert/intermediaire/debutant ici) ...
     if (colorMode === 'expert') {
        el.style.background = "linear-gradient(to bottom, #ff8c00, #ff0000)";
        el.style.boxShadow = "0 0 30px #ff4500";
@@ -307,22 +302,32 @@ function drop(nData) {
         el.style.background = `linear-gradient(to bottom, ${baseColor}, #fff)`;
     }
 
-    if (o.f && colorMode !== 'expert') { 
-        const ind = document.createElement('div'); 
-        ind.className = 'finger-indicator ' + (o.m === 'G' ? 'finger-left' : 'finger-right'); 
-        ind.textContent = o.f; el.appendChild(ind); 
-    }
-    
     fZone.appendChild(el);
 
     const animate = () => {
-        if(!isPaused) o.y += 4;
+        // Utilisation de currentSpeed au lieu de 4
+        if(!isPaused) o.y += currentSpeed; 
+        
         const hit = fZone.offsetHeight - o.h;
-        if(currentMode === 'auto' && !o.ok && o.y >= hit) { handleKeyPress(o.note); o.ok = true; }
-        if(currentMode === 'step' && !o.ok && o.y >= hit) { isPaused = true; o.y = hit; }
+        
+        if(currentMode === 'auto' && !o.ok && o.y >= hit) { 
+            handleKeyPress(o.note); 
+            o.ok = true; 
+        }
+        if(currentMode === 'step' && !o.ok && o.y >= hit) { 
+            isPaused = true; 
+            o.y = hit; 
+        }
+
         el.style.top = o.y + "px";
-        if(o.y < fZone.offsetHeight + 100 && document.getElementById("n-"+id)) requestAnimationFrame(animate);
-        else el.remove();
+
+        if(o.y < fZone.offsetHeight + 100 && document.getElementById("n-"+id)) {
+            requestAnimationFrame(animate);
+        } else {
+            el.remove();
+            // NETTOYAGE : on retire la note du tableau pour libérer la mémoire
+            notesOnScreen = notesOnScreen.filter(n => n.id !== id);
+        }
     }; 
     animate();
 }
@@ -330,16 +335,31 @@ function drop(nData) {
 function startGame(data, mode) {
     clearTimeout(gameLoopTimeout);
     const fZone = document.getElementById('fall-zone');
-    fZone.innerHTML = ''; notesOnScreen = []; 
+    fZone.innerHTML = ''; 
+    notesOnScreen = []; 
     document.getElementById('main-menu').style.display='none'; 
     document.getElementById('game-container').style.display='flex';
     fZone.style.width = document.getElementById('piano').offsetWidth + "px";
-    notesValidated = 0; totalNotesInLevel = data.notes.length; isPaused = false; currentMode = mode;
+    
+    notesValidated = 0; 
+    totalNotesInLevel = data.notes.length; 
+    isPaused = false; 
+    currentMode = mode;
+    
     let i = 0;
     const next = () => {
+        // SOLUTION : Si le jeu est en pause, on attend 100ms et on réessaie 
+        // sans créer de nouvelle note ni avancer dans la liste
+        if (isPaused) {
+            gameLoopTimeout = setTimeout(next, 100);
+            return;
+        }
+
         if(i < data.notes.length) {
             const noteData = data.notes[i];
-            drop(noteData); i++;
+            drop(noteData); 
+            i++;
+            // Le prochain délai ne sera lancé que si on n'est pas en pause
             gameLoopTimeout = setTimeout(next, noteData.d || 800); 
         }
     };
