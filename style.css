@@ -1,3 +1,4 @@
+
 :root { 
     --bg: #050508; 
     --accent: #00f2ff; 
@@ -208,10 +209,10 @@ body {
 
 #hit-line {
     position: absolute !important;
-    bottom: 180px !important; /* Position fixe juste au-dessus du piano */
+    bottom: 0px !important; /* Position fixe juste au-dessus du piano */
     width: 100% !important;
     height: 4px !important; /* Plus épaisse */
-    background: linear-gradient(90deg, transparent, #fff, #ff00ff, #fff, transparent) !important;
+    background: linear-gradient(90deg, transparent, #fff, #00ffff, #fff, transparent) !important;
     box-shadow: 0 0 20px var(--accent), 0 0 40px #ff00ff !important;
     z-index: 99999 !important;
     animation: hitline-pulse 1s infinite !important;
@@ -224,16 +225,16 @@ body {
     0%, 100% { 
         opacity: 0.8; 
         box-shadow: 
-            0 0 20px #ff00ff,
-            0 0 40px #ff00ff,
-            0 0 60px #ff00ff;
+            0 0 20px #00ffff,
+            0 0 40px #00ffff,
+            0 0 60px #00ffff;
     }
     50% { 
         opacity: 1; 
         box-shadow: 
-            0 0 30px #ff00ff,
-            0 0 60px #ff00ff,
-            0 0 90px #ff00ff,
+            0 0 30px #00ffff,
+            0 0 60px #00ffff,
+            0 0 90px #00ffff,
             inset 0 0 20px rgba(255, 255, 255, 0.5);
     }
 }
