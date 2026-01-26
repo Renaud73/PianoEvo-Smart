@@ -2,22 +2,12 @@ const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#",
 const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', 'A': 'LA', 'B': 'SI' };
 const noteColors = { 'C': '#FF0000', 'D': '#FF7F00', 'E': '#FFFF00', 'F': '#00FF00', 'G': '#0000FF', 'A': '#4B0082', 'B': '#8B00FF' };
 let gameLoopTimeout;
-let currentSpeed = 4; // Vitesse par défaut
+let currentSpeed = 4;
 
-function setSpeed(v) {
-    currentSpeed = v;
-    console.log("Nouvelle vitesse :", currentSpeed);
-    
-    // Optionnel : change l'apparence des boutons pour montrer lequel est actif
-    document.querySelectorAll('.speed-controls button').forEach(b => {
-        b.classList.remove('active');
-    });
-    // On cherche le bouton qui a la valeur cliquée pour lui mettre la classe 'active'
-}
-// --- AJOUT VARIABLES EMOJI ET RÔLE ---
+// --- VARIABLES EMOJI ET RÔLE ---
 const availableEmojis = ['🎹', '🎸', '🐱', '🚀', '⭐', '🌈', '🎨', '🎧', '🍦', '🎮'];
-let selectedEmoji = '🎹'; 
-let selectedRole = 'enfant'; // Par défaut
+let selectedEmoji = '🎹';
+let selectedRole = 'enfant';
 
 const DATA = {
     cours: [
@@ -58,39 +48,38 @@ const DATA = {
         { titre: "a-ha - Take On Me", diff: 'hard', notes: [{note:'B3', d:200}, {note:'B3', d:200}, {note:'E4', d:200}, {note:'A4', d:200}, {note:'A4', d:200}, {note:'G#4', d:200}, {note:'E4', d:200}, {note:'G#4', d:200}, {note:'G#4', d:200}, {note:'G#4', d:200}, {note:'E4', d:200}, {note:'D4', d:200}, {note:'E4', d:200}, {note:'G#4', d:200}, {note:'A4', d:200}, {note:'A4', d:200}, {note:'A4', d:200}, {note:'E4', d:200}, {note:'B4', d:400}, {note:'A4', d:800}] },
         { titre: "O-Zone - Dragostea Din Tei", diff: 'medium', notes: [{note:'B4', d:300}, {note:'A4', d:300}, {note:'G4', d:300}, {note:'A4', d:300}, {note:'B4', d:300}, {note:'B4', d:300}, {note:'B4', d:600}, {note:'A4', d:300}, {note:'G4', d:300}, {note:'A4', d:300}, {note:'A4', d:300}, {note:'A4', d:300}, {note:'A4', d:600}] },
         { titre: "Gigi D'Agostino - L'Amour Toujours", diff: 'hard', notes: [{note:'A4', d:200}, {note:'G4', d:200}, {note:'A4', d:200}, {note:'E4', d:400}, {note:'D4', d:400}, {note:'C4', d:400}, {note:'E4', d:200}, {note:'D4', d:200}, {note:'E4', d:200}, {note:'C4', d:400}, {note:'B3', d:400}, {note:'A3', d:800}] },
-        { titre: "Rick Astley - Never Gonna Give You Up", diff: 'medium', notes: [{note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'A4', d:600}, {note:'A4', d:200}, {note:'G4', d:800}, {note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'G4', d:600}, {note:'G4', d:200}, {note:'F4', d:400}, {note:'E4', d:200}, {note:'D4', d:400}, {note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'F4', d:600}, {note:'G4', d:200}, {note:'E4', d:400}, {note:'D4', d:200}, {note:'C4', d:800}] },
-        { titre: "Loreen - Tattoo", diff: 'hard', notes: [{note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200}, {note:'A3', f:1, d:600}, {note:'C4', f:2, d:600}, {note:'E4', f:4, d:1200}, {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'E4', f:4, d:400}, {note:'D4', f:3, d:400}, {note:'C4', f:2, d:800}, {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'C4', f:2, d:400}, {note:'B3', f:1, d:800}, {note:'E4', f:4, d:300}, {note:'F4', f:5, d:300}, {note:'E4', f:4, d:300}, {note:'D4', f:3, d:300}, {note:'C4', f:2, d:1200}, {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600}, {note:'A4', f:5, d:600}, {note:'G4', f:4, d:600}, {note:'F4', f:3, d:600}, {note:'E4', f:2, d:600}, {note:'D4', f:1, d:400}, {note:'E4', f:2, d:400}, {note:'F4', f:3, d:400}, {note:'E4', f:2, d:1500}] },
-        { titre: "Metallica - Nothing Else Matters (Full)", diff: 'medium', notes: [{note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200}, {note:'B3', f:3, d:400}, {note:'G3', f:2, d:400}, {note:'E2', f:1, d:400}, {note:'G3', f:2, d:400}, {note:'B3', f:3, d:400}, {note:'E4', f:5, d:1200}, {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900}, {note:'C4', f:3, d:600}, {note:'A3', f:1, d:900}, {note:'E4', f:5, d:600}, {note:'D4', f:4, d:300}, {note:'C4', f:3, d:600}, {note:'G3', f:1, d:900}, {note:'A3', f:2, d:1200}, {note:'A3', f:1, d:400}, {note:'B3', f:2, d:400}, {note:'C4', f:3, d:800}, {note:'B3', f:2, d:400}, {note:'A3', f:1, d:400}, {note:'G3', f:1, d:1200}] },
-        { titre: "Pirates des Caraïbes (Version Longue)", diff: 'hard', notes: [{note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500}, {note:'E4', f:4, d:250}, {note:'F4', f:5, d:500}, {note:'F4', f:5, d:500}, {note:'F4', f:5, d:500}, {note:'G4', f:4, d:250}, {note:'E4', f:3, d:500}, {note:'E4', f:3, d:500}, {note:'D4', f:2, d:500}, {note:'C4', f:1, d:250}, {note:'D4', f:2, d:750}, {note:'A3', f:1, d:500}, {note:'C4', f:2, d:250}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500}, {note:'D4', f:3, d:500}, {note:'F4', f:5, d:250}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500}, {note:'G4', f:1, d:500}, {note:'A4', f:2, d:250}, {note:'A#4', f:3, d:500}, {note:'A#4', f:3, d:500}, {note:'A4', f:2, d:500}, {note:'G4', f:1, d:250}, {note:'A4', f:2, d:750}] },
-        { titre: "Axel F - Beverly Hills Cop (Long)", diff: 'hard', notes: [{note:'D4', f:1, m:'D', d:400}, {note:'F4', f:3, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, {note:'D4', f:1, m:'D', d:150}, {note:'G4', f:4, m:'D', d:200}, {note:'D4', f:1, m:'D', d:200}, {note:'C4', f:1, m:'D', d:200}, {note:'D4', f:1, m:'D', d:400}, {note:'A4', f:5, m:'D', d:300}, {note:'D4', f:1, m:'D', d:200}, {note:'D4', f:1, m:'D', d:150}, {note:'A#4', f:5, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'F4', f:2, m:'D', d:200}, {note:'D4', f:1, m:'D', d:200}, {note:'A4', f:4, m:'D', d:200}, {note:'D5', f:5, m:'D', d:200}, {note:'D4', f:1, m:'D', d:150}, {note:'C4', f:1, m:'D', d:150}, {note:'C4', f:1, m:'D', d:150}, {note:'E4', f:2, m:'D', d:150}, {note:'D4', f:1, m:'D', d:600}] }
- 
+        { titre: "Rick Astley - Never Gonna Give You Up", diff: 'medium', notes: [{note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'A4', d:600}, {note:'A4', d:200}, {note:'G4', d:800}, {note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'G4', d:600}, {note:'G4', d:200}, {note:'F4', d:400}, {note:'E4', d:200}, {note:'D4', d:400}, {note:'C4', d:200}, {note:'D4', d:200}, {note:'F4', d:200}, {note:'D4', d:200}, {note:'F4', d:600}, {note:'G4', d:200}, {note:'E4', d:400}, {note:'D4', d:200}, {note:'C4', d:800}] }
     ]
 };
 
 let audioContext, notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
-// Mise à jour de la structure du profil par défaut
 let profiles = JSON.parse(localStorage.getItem('pk_profiles')) || [{name: "Apprenti", color: "#00f2ff", avatar: "🎹", role: "enfant", completed: []}];
 let currentProfileName = localStorage.getItem('pk_current') || "Apprenti";
 let currentLevelTitle = "", isMicActive = false;
 let audioAnalyser, microphoneStream, pitchBuffer = new Float32Array(2048);
+let colorMode = 'debutant';
 
 window.onload = () => { 
-    initPiano(); updateProfileDisplay(); switchTab('cours'); 
+    initPiano(); 
+    updateProfileDisplay(); 
+    switchTab('cours'); 
     document.getElementById('mic-toggle').onclick = toggleMic;
     injectColorPicker();
+    ensureHitLineVisible(); // FORCER LA VISIBILITÉ AU DÉMARRAGE
 };
 
 function injectColorPicker() {
     const addBox = document.querySelector('.add-profile-box');
     if(addBox && !document.getElementById('color-picker')){
         const picker = document.createElement('input');
-        picker.type = 'color'; picker.id = 'color-picker'; picker.value = '#00f2ff';
+        picker.type = 'color'; 
+        picker.id = 'color-picker'; 
+        picker.value = '#00f2ff';
         picker.style.marginRight = '10px';
         addBox.insertBefore(picker, addBox.firstChild);
     }
 }
 
-// --- LOGIQUE SÉLECTEUR EMOJI ---
 function setupEmojiPicker() {
     const picker = document.getElementById('emoji-picker');
     if (!picker) return;
@@ -109,15 +98,10 @@ function setupEmojiPicker() {
     });
 }
 
-// --- LOGIQUE SÉLECTEUR RÔLE ---
 function setRole(role) {
-    selectedRole = role; // Met à jour la variable globale
-    
-    // On retire la classe 'active' des deux boutons
+    selectedRole = role;
     document.getElementById('role-enfant').classList.remove('active');
     document.getElementById('role-adulte').classList.remove('active');
-    
-    // On ajoute la classe 'active' au bouton cliqué
     if (role === 'enfant') {
         document.getElementById('role-enfant').classList.add('active');
     } else {
@@ -134,23 +118,29 @@ function toggleFullScreen() {
 }
 
 function initPiano() {
-    const p = document.getElementById('piano'); p.innerHTML = ''; let whiteKeyPosition = 0;
+    const p = document.getElementById('piano'); 
+    p.innerHTML = ''; 
+    let whiteKeyPosition = 0;
     [2,3,4,5,6].forEach(oct => {
         noteStrings.forEach(n => {
             if(oct === 6 && n !== 'C') return;
             const isB = n.includes('#'), k = document.createElement('div');
-            k.className = `key ${isB ? 'black' : 'white'}`; k.dataset.note = n+oct;
+            k.className = `key ${isB ? 'black' : 'white'}`; 
+            k.dataset.note = n+oct;
             if(!isB) {
                 k.innerHTML = `<span style="color: ${noteColors[n]}">${noteNamesFR[n]}</span>`;
-                k.style.left = `${whiteKeyPosition}px`; whiteKeyPosition += 55;
-            } else { k.style.left = `${whiteKeyPosition - 55 + 27.5 - 15}px`; }
-            k.onmousedown = () => handleKeyPress(n+oct); p.appendChild(k);
+                k.style.left = `${whiteKeyPosition}px`; 
+                whiteKeyPosition += 55;
+            } else { 
+                k.style.left = `${whiteKeyPosition - 55 + 27.5 - 15}px`; 
+            }
+            k.onmousedown = () => handleKeyPress(n+oct); 
+            p.appendChild(k);
         });
     });
     p.style.width = `${whiteKeyPosition + 40}px`;
 }
 
-// --- MISE À JOUR switchTab AVEC VERROUILLAGE ---
 function switchTab(tabType) {
     const g = document.getElementById('content-grid'); 
     g.innerHTML = '';
@@ -166,7 +156,6 @@ function switchTab(tabType) {
 
     const items = DATA[tabType] || [];
     items.forEach((item, index) => {
-        // Verrouillage : seulement si Enfant ET pas le premier ET précédent non fini
         const isLocked = isEnfant && index > 0 && !completed.includes(items[index-1].titre);
         
         const c = document.createElement('div'); 
@@ -180,16 +169,21 @@ function switchTab(tabType) {
         `;
         
         if(!isLocked) {
-            c.onclick = () => { currentLevelTitle = item.titre; const mode = (tabType === 'musique') ? 'auto' : 'step'; startGame(item, mode); };
+            c.onclick = () => { 
+                currentLevelTitle = item.titre; 
+                const mode = (tabType === 'musique') ? 'auto' : 'step'; 
+                startGame(item, mode); 
+            };
         }
         g.appendChild(c);
     });
 }
 
 function handleKeyPress(note) {
+    // 1. Animation de la touche du piano
     const k = document.querySelector(`.key[data-note="${note}"]`);
     if(k) { 
-        // --- SYNC DES TOUCHES AVEC LE STYLE ---
+        // Animation selon le mode couleur
         if (colorMode === 'expert') {
             // Style LAVE (Orange/Rouge)
             k.style.background = "linear-gradient(to bottom, #ff8c00, #ff0000)";
@@ -207,31 +201,76 @@ function handleKeyPress(note) {
             k.style.boxShadow = `0 0 20px ${color}`;
         }
 
-        // On retire le style après 200ms
+        // Retirer le style après 200ms
         setTimeout(() => {
             k.style.background = "";
             k.style.backgroundColor = "";
             k.style.boxShadow = "";
             k.style.border = "";
         }, 200);
+    }
 
-        // --- Logique de validation des notes (Reste inchangée) ---
-        const t = notesOnScreen.find(n => n.note === note && !n.ok);
-        if(t) {
-            t.ok = true; notesValidated++;
-            const el = document.getElementById("n-"+t.id);
-            if(el) {
-                const rect = el.getBoundingClientRect(), fZone = document.getElementById('fall-zone'), fRect = fZone.getBoundingClientRect();
-                createExplosion(rect.left - fRect.left + (rect.width/2), rect.top - fRect.top + (rect.height/2), noteColors[note.replace(/[0-9#]/g, '')] || '#fff');
-                el.remove();
-            }
-            isPaused = false; playNoteSound(getFreq(note));
+    // 2. Jouer le son (TOUJOURS, même si la note n'est pas dans la séquence)
+    playNoteSound(getFreq(note));
+
+    // 3. Trouver la note correspondante dans la zone de chute
+    const t = notesOnScreen.find(n => n.note === note && !n.ok);
+    
+    // 4. SI on trouve une note qui tombe
+    if(t) {
+        t.ok = true; 
+        notesValidated++;
+        const el = document.getElementById("n-"+t.id);
+        
+        if(el) {
+            // 🔥 **CORRECTION : Créer l'explosion à la position de la ligne, pas de la note**
+            const fZone = document.getElementById('fall-zone');
+            const hitLine = document.getElementById('hit-line');
+            const hitLineRect = hitLine.getBoundingClientRect();
+            const fZoneRect = fZone.getBoundingClientRect();
             
-            if(notesValidated === totalNotesInLevel) { 
-                saveProgress(currentLevelTitle); 
-                setTimeout(() => { alert("Bravo !"); quitGame(); }, 500); 
-            }
-        } else { playNoteSound(getFreq(note)); }
+            // Position X = centre de la touche
+            const targetKey = document.querySelector(`.key[data-note="${note}"]`);
+            const x = targetKey.offsetLeft + targetKey.offsetWidth / 2;
+            
+            // Position Y = position exacte de la ligne de jeu
+            const y = hitLineRect.top - fZoneRect.top;
+
+            // Couleur de l'explosion
+            const explosionColor = noteColors[note.replace(/[0-9#]/g, '')] || '#fff';
+            
+            // Créer l'explosion
+            createExplosion(x, y, explosionColor);
+            
+            // Supprimer la note visuelle
+            el.remove();
+        }
+        
+        // Reprendre le jeu si on était en pause
+        isPaused = false; 
+        
+        // Vérifier si le niveau est terminé
+        if(notesValidated === totalNotesInLevel) { 
+            saveProgress(currentLevelTitle); 
+            setTimeout(() => { alert("Bravo !"); quitGame(); }, 500); 
+        }
+    } 
+    // 5. SI on ne trouve PAS de note (joueur appuie trop tôt ou sur une mauvaise touche)
+    else {
+        // 🔥 **OPTIONNEL : Créer un petit effet d'erreur**
+        const fZone = document.getElementById('fall-zone');
+        const hitLine = document.getElementById('hit-line');
+        const hitLineRect = hitLine.getBoundingClientRect();
+        const fZoneRect = fZone.getBoundingClientRect();
+        
+        const targetKey = document.querySelector(`.key[data-note="${note}"]`);
+        if(targetKey) {
+            const x = targetKey.offsetLeft + targetKey.offsetWidth / 2;
+            const y = hitLineRect.top - fZoneRect.top;
+            
+            // Effet d'erreur (plus petit et gris)
+            createExplosion(x, y, '#888');
+        }
     }
 }
 
@@ -239,37 +278,47 @@ function createExplosion(x, y, color) {
     const fZone = document.getElementById('fall-zone');
     const isExpert = (colorMode === 'expert');
     
-    // Onde de choc plus grande
+    // Onde de choc
     const shock = document.createElement('div');
     shock.className = 'shockwave';
-    shock.style.left = x + 'px'; shock.style.top = y + 'px'; 
+    shock.style.left = x + 'px'; 
+    shock.style.top = y + 'px'; 
     shock.style.boxShadow = `0 0 ${isExpert ? '80px' : '30px'} ${isExpert ? '#ff00ff' : color}`;
     if(isExpert) shock.style.transform = 'translate(-50%, -50%) scale(2)';
     
-    fZone.appendChild(shock); setTimeout(() => shock.remove(), 400);
+    fZone.appendChild(shock); 
+    setTimeout(() => shock.remove(), 400);
 
-    // Plus de particules en mode Expert (30 au lieu de 12)
+    // Particules
     const particleCount = isExpert ? 30 : 12;
     for (let i = 0; i < particleCount; i++) {
         const p = document.createElement('div');
         p.className = 'spark-particle';
-      // Effet d'explosion de lave
-p.style.background = "radial-gradient(circle, #ffd700, #ff4500, #ff0000)";
-p.style.boxShadow = "0 0 40px #ff4500, 0 0 80px #ff0000";
-p.style.transform = "scale(1.2)"; // La touche "gonfle" un peu sous la chaleur
-p.style.transition = "all 0.1s ease-out";
+        p.style.background = `radial-gradient(circle, #ffd700, #ff4500, #ff0000)`;
         p.style.boxShadow = `0 0 12px ${isExpert ? '#00f2ff' : color}`;
-        p.style.left = x + 'px'; p.style.top = y + 'px';
+        p.style.left = x + 'px'; 
+        p.style.top = y + 'px';
         
-        // Vitesse beaucoup plus rapide pour l'effet "explosion"
         const angle = Math.random() * Math.PI * 2;
         const speed = isExpert ? (150 + Math.random() * 200) : (60 + Math.random() * 100);
         
         p.style.setProperty('--angle', `${angle}rad`);
         p.style.setProperty('--vx', `${Math.cos(angle) * speed}px`);
         p.style.setProperty('--vy', `${Math.sin(angle) * speed}px`);
-        fZone.appendChild(p); setTimeout(() => p.remove(), 800);
+        fZone.appendChild(p); 
+        setTimeout(() => p.remove(), 800);
     }
+}
+
+function setSpeed(v) {
+    currentSpeed = v;
+    console.log("Nouvelle vitesse :", currentSpeed);
+    document.querySelectorAll('.speed-controls button').forEach(b => {
+        b.classList.remove('active');
+        if (b.textContent.includes('Lent') && v === 2) b.classList.add('active');
+        if (b.textContent.includes('Normal') && v === 4) b.classList.add('active');
+        if (b.textContent.includes('Rapide') && v === 7) b.classList.add('active');
+    });
 }
 
 function drop(nData) {
@@ -278,18 +327,22 @@ function drop(nData) {
     if(!targetKey) return;
 
     const id = Math.random();
-    // On utilise currentSpeed ici pour définir la vitesse de descente
     const o = { ...nData, y: -100, ok: false, id: id, h: 70 };
     notesOnScreen.push(o);
 
     const el = document.createElement('div');
     el.className = 'falling-note';
     el.id = "n-"+id;
-    el.style.left = targetKey.offsetLeft + "px"; 
     el.style.width = targetKey.offsetWidth + "px"; 
     el.style.height = o.h + "px";
 
-    // ... (garde ton bloc de style expert/intermediaire/debutant ici) ...
+    // 🔥 **CORRECTION : Calculer la position exacte dans fall-zone**
+    const keyRect = targetKey.getBoundingClientRect();
+    const fZoneRect = fZone.getBoundingClientRect();
+    const relativeLeft = keyRect.left - fZoneRect.left;
+    el.style.left = relativeLeft + "px";
+
+    // Style selon mode couleur
     if (colorMode === 'expert') {
        el.style.background = "linear-gradient(to bottom, #ff8c00, #ff0000)";
        el.style.boxShadow = "0 0 30px #ff4500";
@@ -304,19 +357,28 @@ function drop(nData) {
 
     fZone.appendChild(el);
 
+    // 🔥 **CORRECTION : Position Y exacte de la ligne**
+    const hitLine = document.getElementById('hit-line');
+    const hitLineRect = hitLine.getBoundingClientRect();
+    const hitLineY = hitLineRect.top - fZoneRect.top;
+
     const animate = () => {
-        // Utilisation de currentSpeed au lieu de 4
         if(!isPaused) o.y += currentSpeed; 
         
-        const hit = fZone.offsetHeight - o.h;
+        const bottomOfNote = o.y + o.h;
         
-        if(currentMode === 'auto' && !o.ok && o.y >= hit) { 
+        // Collision avec la ligne
+        if(currentMode === 'auto' && !o.ok && bottomOfNote >= hitLineY) { 
             handleKeyPress(o.note); 
             o.ok = true; 
+            createExplosion(relativeLeft + targetKey.offsetWidth/2, hitLineY, noteColors[o.note.replace(/[0-9#]/g, '')] || '#fff');
+            el.remove();
+            return;
         }
-        if(currentMode === 'step' && !o.ok && o.y >= hit) { 
+        
+        if(currentMode === 'step' && !o.ok && bottomOfNote >= hitLineY) { 
             isPaused = true; 
-            o.y = hit; 
+            o.y = hitLineY - o.h; // Alignement parfait
         }
 
         el.style.top = o.y + "px";
@@ -325,7 +387,6 @@ function drop(nData) {
             requestAnimationFrame(animate);
         } else {
             el.remove();
-            // NETTOYAGE : on retire la note du tableau pour libérer la mémoire
             notesOnScreen = notesOnScreen.filter(n => n.id !== id);
         }
     }; 
@@ -341,15 +402,22 @@ function startGame(data, mode) {
     document.getElementById('game-container').style.display='flex';
     fZone.style.width = document.getElementById('piano').offsetWidth + "px";
     
+    // CRÉER LA LIGNE DE JEU SI ELLE N'EXISTE PAS
+    if (!document.getElementById('hit-line')) {
+        const hitLine = document.createElement('div');
+        hitLine.id = 'hit-line';
+        fZone.appendChild(hitLine);
+    }
+    
     notesValidated = 0; 
     totalNotesInLevel = data.notes.length; 
     isPaused = false; 
     currentMode = mode;
     
+    ensureHitLineVisible(); // FORCER LA VISIBILITÉ
+    
     let i = 0;
     const next = () => {
-        // SOLUTION : Si le jeu est en pause, on attend 100ms et on réessaie 
-        // sans créer de nouvelle note ni avancer dans la liste
         if (isPaused) {
             gameLoopTimeout = setTimeout(next, 100);
             return;
@@ -359,8 +427,7 @@ function startGame(data, mode) {
             const noteData = data.notes[i];
             drop(noteData); 
             i++;
-            // Le prochain délai ne sera lancé que si on n'est pas en pause
-            gameLoopTimeout = setTimeout(next, noteData.d || 800); 
+            gameLoopTimeout = setTimeout(next, noteData.d || 800);
         }
     };
     next();
@@ -374,53 +441,73 @@ function quitGame() {
     notesOnScreen = []; 
     isPaused = true;
 
-    // --- MISE À JOUR AUTOMATIQUE DU MENU ---
-    // On récupère l'onglet qui était ouvert (cours, exercices ou musique)
     const activeTabBtn = document.querySelector('.tab-btn.active');
     if (activeTabBtn) {
-        // On récupère le type d'onglet depuis l'attribut onclick
-        // Exemple: switchTab('cours') -> on extrait 'cours'
         const tabType = activeTabBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
         switchTab(tabType); 
     }
 }
 
 function updateProfileDisplay() {
-    const list = document.getElementById('profiles-list'); list.innerHTML = '';
+    const list = document.getElementById('profiles-list'); 
+    list.innerHTML = '';
     profiles.forEach((p, index) => {
-        const item = document.createElement('div'); item.className = 'profile-item';
+        const item = document.createElement('div'); 
+        item.className = 'profile-item';
         item.style.borderLeft = `4px solid ${p.color}`;
         item.innerHTML = `<span>${p.avatar} ${p.name} ${p.name === currentProfileName ? '✅' : ''}</span>
                           <button onclick="deleteProfile(${index}, event)" class="btn-del">🗑️</button>`;
-        item.onclick = () => selectProfile(p.name); list.appendChild(item);
+        item.onclick = () => selectProfile(p.name); 
+        list.appendChild(item);
     });
     const curr = profiles.find(p => p.name === currentProfileName) || profiles[0];
     document.getElementById('display-username').textContent = curr.name;
     document.documentElement.style.setProperty('--accent', curr.color);
 }
 
-// --- MODIFICATION createNewProfile ---
 function createNewProfile() {
-    const input = document.getElementById('input-username'), colorP = document.getElementById('color-picker');
+    const input = document.getElementById('input-username'), 
+          colorP = document.getElementById('color-picker');
     if(input.value.trim()) {
         profiles.push({ 
             name: input.value.trim(), 
             color: colorP.value, 
             avatar: selectedEmoji,
-            role: selectedRole, // Ajout du rôle
+            role: selectedRole,
             completed: [] 
         });
-        localStorage.setItem('pk_profiles', JSON.stringify(profiles)); updateProfileDisplay(); input.value = '';
+        localStorage.setItem('pk_profiles', JSON.stringify(profiles)); 
+        updateProfileDisplay(); 
+        input.value = '';
     }
 }
 
-function deleteProfile(i, e) { e.stopPropagation(); if(profiles.length > 1 && confirm("Supprimer ?")) { profiles.splice(i, 1); localStorage.setItem('pk_profiles', JSON.stringify(profiles)); updateProfileDisplay(); } }
-function selectProfile(n) { currentProfileName = n; localStorage.setItem('pk_current', n); updateProfileDisplay(); closeProfileModal(); switchTab('cours'); }
+function deleteProfile(i, e) { 
+    e.stopPropagation(); 
+    if(profiles.length > 1 && confirm("Supprimer ?")) { 
+        profiles.splice(i, 1); 
+        localStorage.setItem('pk_profiles', JSON.stringify(profiles)); 
+        updateProfileDisplay(); 
+    } 
+}
 
-function openProfileModal() { document.getElementById('profile-modal').style.display = 'flex'; setupEmojiPicker(); }
-function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+function selectProfile(n) { 
+    currentProfileName = n; 
+    localStorage.setItem('pk_current', n); 
+    updateProfileDisplay(); 
+    closeProfileModal(); 
+    switchTab('cours'); 
+}
 
-// --- MISE À JOUR saveProgress PAR PROFIL ---
+function openProfileModal() { 
+    document.getElementById('profile-modal').style.display = 'flex'; 
+    setupEmojiPicker(); 
+}
+
+function closeProfileModal() { 
+    document.getElementById('profile-modal').style.display = 'none'; 
+}
+
 function saveProgress(title) {
     const currentP = profiles.find(p => p.name === currentProfileName);
     if(currentP) {
@@ -432,56 +519,91 @@ function saveProgress(title) {
     }
 }
 
-function getFreq(n) { const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]; return 440 * Math.pow(2, (notes.indexOf(n.slice(0,-1)) + (parseInt(n.slice(-1)) - 4) * 12 - 9) / 12); }
+function getFreq(n) { 
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]; 
+    return 440 * Math.pow(2, (notes.indexOf(n.slice(0,-1)) + (parseInt(n.slice(-1)) - 4) * 12 - 9) / 12); 
+}
+
 function playNoteSound(f) { 
     if(!audioContext) audioContext = new AudioContext();
     if (audioContext.state === 'suspended') audioContext.resume();
-    const o = audioContext.createOscillator(), g = audioContext.createGain(); 
-    o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1); 
-    o.connect(g); g.connect(audioContext.destination); o.start(); o.stop(audioContext.currentTime + 1); 
+    const o = audioContext.createOscillator(), 
+          g = audioContext.createGain(); 
+    o.frequency.value = f; 
+    g.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 1); 
+    o.connect(g); 
+    g.connect(audioContext.destination); 
+    o.start(); 
+    o.stop(audioContext.currentTime + 1); 
 }
 
 async function toggleMic() {
     const btn = document.getElementById('mic-toggle');
     if (!isMicActive) {
         try {
-            microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-            isMicActive = true; btn.textContent = "🎤 Micro ON"; btn.classList.add('mic-active');
+            microphoneStream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { 
+                    echoCancellation: true, 
+                    noiseSuppression: true,
+                    autoGainControl: false
+                } 
+            });
+            isMicActive = true; 
+            btn.textContent = "🎤 Micro ON"; 
+            btn.classList.add('mic-active');
+            
             if (!audioContext) audioContext = new AudioContext();
             const source = audioContext.createMediaStreamSource(microphoneStream);
-            audioAnalyser = audioContext.createAnalyser(); audioAnalyser.fftSize = 2048; source.connect(audioAnalyser);
+            audioAnalyser = audioContext.createAnalyser(); 
+            audioAnalyser.fftSize = 2048; 
+            source.connect(audioAnalyser);
+            
             const detect = () => {
                 if (!isMicActive) return;
                 audioAnalyser.getFloatTimeDomainData(pitchBuffer);
                 let f = autoCorrelate(pitchBuffer, audioContext.sampleRate);
-                if (f !== -1) { let n = getNoteFromFreq(f); if (n) handleKeyPress(n); }
+                if (f !== -1) { 
+                    let n = getNoteFromFreq(f); 
+                    if (n) handleKeyPress(n); 
+                }
                 requestAnimationFrame(detect);
-            }; detect();
-        } catch (err) { alert("Micro non activé."); }
+            }; 
+            detect();
+        } catch (err) { 
+            alert("Micro non activé. Erreur: " + err.message); 
+        }
     } else {
-        isMicActive = false; btn.textContent = "🎤 Micro OFF"; btn.classList.remove('mic-active');
+        isMicActive = false; 
+        btn.textContent = "🎤 Micro OFF"; 
+        btn.classList.remove('mic-active');
         if (microphoneStream) microphoneStream.getTracks().forEach(t => t.stop());
     }
 }
 
 function autoCorrelate(b, s) {
-    let rms = 0; for(let i=0;i<b.length;i++) rms += b[i]*b[i]; if(Math.sqrt(rms/b.length)<0.15) return -1;
+    let rms = 0; 
+    for(let i=0;i<b.length;i++) rms += b[i]*b[i]; 
+    if(Math.sqrt(rms/b.length)<0.15) return -1;
+    
     let r1=0, r2=b.length-1, thres=0.2;
     for(let i=0;i<b.length/2;i++) if(Math.abs(b[i])<thres){r1=i;break;}
     for(let i=1;i<b.length/2;i++) if(Math.abs(b[b.length-i])<thres){r2=b.length-i;break;}
+    
     let b2 = b.slice(r1,r2), c = new Float32Array(b2.length);
     for(let i=0;i<b2.length;i++) for(let j=0;j<b2.length-i;j++) c[i] += b2[j]*b2[j+i];
+    
     let d=0; while(c[d]>c[d+1]) d++;
-    let maxv=-1, maxp=-1; for(let i=d;i<b2.length;i++) if(c[i]>maxv){maxv=c[i];maxp=i;}
+    let maxv=-1, maxp=-1; 
+    for(let i=d;i<b2.length;i++) if(c[i]>maxv){maxv=c[i];maxp=i;}
+    
     return s / maxp;
 }
 
 function getNoteFromFreq(f) {
-    const n = 12 * (Math.log2(f / 440)) + 69; if(isNaN(n)) return null;
+    const n = 12 * (Math.log2(f / 440)) + 69; 
+    if(isNaN(n)) return null;
     return noteStrings[Math.round(n)%12] + (Math.floor(Math.round(n)/12)-1);
 }
-
-let colorMode = 'debutant'; // Peut être 'debutant', 'intermediaire', ou 'expert'
 
 function toggleColorMode() {
     const btn = document.getElementById('color-mode-btn');
@@ -492,7 +614,7 @@ function toggleColorMode() {
     } else if (colorMode === 'intermediaire') {
         colorMode = 'expert';
         btn.textContent = "🔥 EXPERT";
-        btn.style.color = "#ff00ff"; // Rose/Violet électrique
+        btn.style.color = "#ff00ff";
         btn.classList.add('expert-glow');
     } else {
         colorMode = 'debutant';
@@ -501,3 +623,41 @@ function toggleColorMode() {
         btn.classList.remove('expert-glow');
     }
 }
+
+// =========================================
+// 🎯 FIX : GARANTIR QUE LA LIGNE DE JEU EST TOUJOURS VISIBLE
+// =========================================
+function ensureHitLineVisible() {
+    const hitLine = document.getElementById('hit-line');
+    const fallZone = document.getElementById('fall-zone');
+    
+    if (hitLine && fallZone) {
+        hitLine.style.display = 'block';
+        hitLine.style.visibility = 'visible';
+        hitLine.style.opacity = '1';
+        hitLine.style.zIndex = '99999';
+        console.log('✅ LIGNE DE JEI INITIALISÉE et visible');
+    } else {
+        console.log('❌ LIGNE DE JEI MANQUANTE - recréation en cours...');
+        // Recréer la ligne si elle n'existe pas
+        if (fallZone && !hitLine) {
+            const newHitLine = document.createElement('div');
+            newHitLine.id = 'hit-line';
+            fallZone.appendChild(newHitLine);
+        }
+    }
+}
+
+// =========================================
+// CONTROLES CLAVIER (OPTIONNEL)
+// =========================================
+document.addEventListener('keydown', (e) => {
+    const keyMap = {
+        'a': 'C4', 'z': 'D4', 'e': 'E4', 'r': 'F4', 't': 'G4',
+        'y': 'A4', 'u': 'B4', 'q': 'C5', 's': 'C#4', 'd': 'D#4',
+        'g': 'F#4', 'h': 'G#4', 'j': 'A#4'
+    };
+    if (keyMap[e.key.toLowerCase()]) {
+        handleKeyPress(keyMap[e.key.toLowerCase()]);
+    }
+});
