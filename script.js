@@ -1,11 +1,10 @@
 const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', 'A': 'LA', 'B': 'SI' };
 const noteColors = { 'C': '#FF0000', 'D': '#FF7F00', 'E': '#FFFF00', 'F': '#00FF00', 'G': '#0000FF', 'A': '#4B0082', 'B': '#8B00FF' };
-const availableEmojis = ["🎹", "🎵", "🎶", "🎼", "🎤", "🎸", "🎺", "🎻", "🥁", "🎬", "🎭", "🎪", "🎨", "🎰", "🎲", "🎳", "🎯", "🎮", "🎰", "🎪"];
+const availableEmojis = ["🎹", "🎵", "🎶", "🎼", "🎤", "🎸", "🎺", "🎻", "🥁", "🎬", "🎭", "🎪", "🎨", "🎰", "🎲", "🎳", "🎯", "🎮"];
 let gameLoopTimeout;
 let currentSpeed = 4;
 
-// --- VARIABLES EMOJI ET RÔLE ---
 let selectedRole = 'enfant';
 let selectedEmoji = '🎹';
 let audioContext, notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
@@ -14,7 +13,6 @@ let currentProfileName = localStorage.getItem('pk_current') || "Apprenti";
 let currentLevelTitle = "", isMicActive = false;
 let audioAnalyser, microphoneStream, pitchBuffer = new Float32Array(2048);
 let colorMode = 'debutant';
-setupMIDI();
 
 window.onload = () => { 
     initPiano(); 
@@ -70,18 +68,6 @@ const DATA = {
     ]
 };
 
-function injectColorPicker() {
-    const addBox = document.querySelector('.add-profile-box');
-    if(addBox && !document.getElementById('color-picker')){
-        const picker = document.createElement('input');
-        picker.type = 'color'; 
-        picker.id = 'color-picker'; 
-        picker.value = '#00f2ff';
-        picker.style.marginRight = '10px';
-        addBox.insertBefore(picker, addBox.firstChild);
-    }
-}
-
 function setupEmojiPicker() {
     const picker = document.getElementById('emoji-picker');
     if (!picker) return;
@@ -136,7 +122,7 @@ function initPiano() {
             } else { 
                 k.style.left = `${whiteKeyPosition - 55 + 27.5 - 15}px`; 
             }
-            k.onmousedown = () => handleKeyPress(n+oct); 
+            k.onmousedown = () => handleKeyPress(n+oct, true); 
             p.appendChild(k);
         });
     });
@@ -182,7 +168,6 @@ function switchTab(tabType) {
 }
 
 function handleKeyPress(note, isManual = false) {
-    // Animation de la touche
     const k = document.querySelector(`.key[data-note="${note}"]`);
     if(k) { 
         if (colorMode === 'expert') {
@@ -207,13 +192,10 @@ function handleKeyPress(note, isManual = false) {
         }, 200);
     }
 
-    // Jouer le son
     playNoteSound(getFreq(note));
 
-    // Chercher la note correspondante qui tombe
     const t = notesOnScreen.find(n => n.note === note && !n.ok);
     
-    // SI NOTE TROUVÉE → Validation et explosion
     if(t) {
         t.ok = true; 
         notesValidated++;
@@ -232,11 +214,7 @@ function handleKeyPress(note, isManual = false) {
                              (colorMode === 'intermediaire') ? "#00d9ff" : 
                              (noteColors[note.replace(/[0-9#]/g, '')] || '#00f2ff');
             
-            createExplosion(
-                relativeLeft + targetKey.offsetWidth/2, 
-                hitLineY, 
-                visualColor
-            );
+            createExplosion(relativeLeft + targetKey.offsetWidth/2, hitLineY, visualColor);
             
             noteElement.remove();
             notesOnScreen = notesOnScreen.filter(n => n.id !== t.id);
@@ -244,7 +222,6 @@ function handleKeyPress(note, isManual = false) {
         
         isPaused = false; 
         
-        // Vérification de fin de niveau
         if(notesValidated === totalNotesInLevel) { 
             saveProgress(currentLevelTitle); 
             setTimeout(() => { 
@@ -252,9 +229,7 @@ function handleKeyPress(note, isManual = false) {
                 quitGame(); 
             }, 500); 
         }
-    } 
-    // SI PAS DE NOTE → petit effet (manuel uniquement)
-    else if(isManual) {
+    } else if(isManual) {
         const targetKey = document.querySelector(`.key[data-note="${note}"]`);
         const fZone = document.getElementById('fall-zone');
         
@@ -275,44 +250,221 @@ function createExplosion(x, y, color) {
     const fZone = document.getElementById('fall-zone');
     if (!fZone) return;
 
+    // S'assurer que fall-zone est en position relative
     if (getComputedStyle(fZone).position === 'static') {
         fZone.style.position = 'relative';
     }
 
-    const shock = document.createElement('div');
-    shock.className = 'shockwave';
-    shock.style.left = (x - 75) + 'px';
-    shock.style.top = (y - 75) + 'px';
-    shock.style.background = `radial-gradient(circle, ${color}44, transparent)`;
-    
-    fZone.appendChild(shock);
+    // Mode Expert : Explosion feu allégée (max 8 éléments)
+    if (colorMode === 'expert') {
+        // 1. Flash central seulement (1 élément)
+        const flash = document.createElement('div');
+        flash.className = 'exp-flash';
+        flash.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0.8) 40%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 40px rgba(255,150,0,1);
+            pointer-events: none;
+            z-index: 1000;
+            animation: flashAnim 0.4s ease-out forwards;
+        `;
+        fZone.appendChild(flash);
+        setTimeout(() => flash.remove(), 400);
 
-    for (let i = 0; i < 12; i++) {
-        const p = document.createElement('div');
-        p.className = 'spark-particle';
-        p.style.left = x + 'px';
-        p.style.top = y + 'px';
-        p.style.color = color;
-        
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 60 + Math.random() * 100;
-        
-        p.style.setProperty('--vx', `${Math.cos(angle) * speed}px`);
-        p.style.setProperty('--vy', `${Math.sin(angle) * speed}px`);
-        
-        fZone.appendChild(p);
+        // 2. Seulement 6 particules avec animation CSS (pas de JS)
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 * i) / 6;
+            const dist = 60 + Math.random() * 40;
+            const p = document.createElement('div');
+            p.style.cssText = `
+                position: absolute;
+                left: ${x}px;
+                top: ${y}px;
+                width: 6px;
+                height: 20px;
+                background: linear-gradient(to top, transparent, #ffaa00);
+                border-radius: 50%;
+                box-shadow: 0 0 8px #ff6600;
+                pointer-events: none;
+                z-index: 999;
+                transform: translate(-50%, -50%) rotate(${angle}rad);
+                animation: particleShoot 0.6s ease-out forwards;
+                --tx: ${Math.cos(angle) * dist}px;
+                --ty: ${Math.sin(angle) * dist}px;
+            `;
+            fZone.appendChild(p);
+            setTimeout(() => p.remove(), 600);
+        }
+        return;
     }
+
+    // Mode Intermédiaire : Explosion bleue allégée
+    if (colorMode === 'intermediaire') {
+        const flash = document.createElement('div');
+        flash.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(0,217,255,0.8) 40%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px rgba(0,217,255,1);
+            pointer-events: none;
+            z-index: 1000;
+            animation: flashAnim 0.4s ease-out forwards;
+        `;
+        fZone.appendChild(flash);
+        setTimeout(() => flash.remove(), 400);
+
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 * i) / 6;
+            const dist = 50 + Math.random() * 30;
+            const p = document.createElement('div');
+            p.style.cssText = `
+                position: absolute;
+                left: ${x}px;
+                top: ${y}px;
+                width: 4px;
+                height: 15px;
+                background: linear-gradient(to top, transparent, #00d9ff);
+                border-radius: 50%;
+                box-shadow: 0 0 6px #00d9ff;
+                pointer-events: none;
+                z-index: 999;
+                transform: translate(-50%, -50%) rotate(${angle}rad);
+                animation: particleShoot 0.5s ease-out forwards;
+                --tx: ${Math.cos(angle) * dist}px;
+                --ty: ${Math.sin(angle) * dist}px;
+            `;
+            fZone.appendChild(p);
+            setTimeout(() => p.remove(), 500);
+        }
+        return;
+    }
+
+    // Mode Débutant : Minimaliste
+    const flash = document.createElement('div');
+    flash.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, white 0%, ${color} 40%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 1000;
+        animation: flashAnim 0.3s ease-out forwards;
+    `;
+    fZone.appendChild(flash);
+    setTimeout(() => flash.remove(), 300);
+
+    // 4 particules seulement
+    for (let i = 0; i < 4; i++) {
+        const angle = (Math.PI * 2 * i) / 4;
+        const p = document.createElement('div');
+        p.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            width: 6px;
+            height: 6px;
+            background: ${color};
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+            animation: simpleParticle 0.4s ease-out forwards;
+            --angle: ${angle}rad;
+        `;
+        fZone.appendChild(p);
+        setTimeout(() => p.remove(), 400);
+    }
+}
+
+// CSS à ajouter dans le head ou dans style.css
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes flashAnim {
+        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+    }
+    @keyframes particleShoot {
+        0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); opacity: 1; }
+        100% { transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+    @keyframes simpleParticle {
+        0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) scale(1); opacity: 1; }
+        100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(40px) scale(0); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Fonction startGame corrigée avec ligne au BON endroit
+function startGame(data, mode) {
+    clearTimeout(gameLoopTimeout);
+    const fZone = document.getElementById('fall-zone');
     
+    // VIDE TOUT
+    fZone.innerHTML = '';
+    
+    // CRÉE LA LIGNE AU NIVEAU DU PIANO (bottom: 0 = tout en bas)
+    const hitLine = document.createElement('div');
+    hitLine.id = 'hit-line';
+    hitLine.style.cssText = `
+        position: absolute;
+        bottom: 0px;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #fff, #ff00ff, #fff, transparent);
+        box-shadow: 0 0 20px var(--accent), 0 0 40px #ff00ff;
+        z-index: 99999;
+        pointer-events: none;
+    `;
+    fZone.appendChild(hitLine);
+    
+    notesOnScreen = []; 
+    document.getElementById('main-menu').style.display='none'; 
+    document.getElementById('game-container').style.display='flex';
+    
+    // Important : attendre que le DOM soit rendu pour calculer la largeur
     setTimeout(() => {
-        document.querySelectorAll('.shockwave, .spark-particle').forEach(el => {
-            if(el.parentNode) el.remove();
-        });
-    }, 1000);
+        fZone.style.width = document.getElementById('piano').offsetWidth + "px";
+    }, 10);
+    
+    notesValidated = 0; 
+    totalNotesInLevel = data.notes.length; 
+    isPaused = false; 
+    currentMode = mode;
+    
+    let i = 0;
+    const next = () => {
+        if (isPaused) {
+            gameLoopTimeout = setTimeout(next, 100);
+            return;
+        }
+
+        if(i < data.notes.length) {
+            const noteData = data.notes[i];
+            drop(noteData); 
+            i++;
+            gameLoopTimeout = setTimeout(next, noteData.d || 800);
+        }
+    };
+    next();
 }
 
 function setSpeed(v) {
     currentSpeed = v;
-    console.log("Nouvelle vitesse :", currentSpeed);
     document.querySelectorAll('.speed-controls button').forEach(b => {
         b.classList.remove('active');
         if (b.textContent.includes('Lent') && v === 2) b.classList.add('active');
@@ -363,7 +515,7 @@ function drop(nData) {
     fZone.appendChild(el);
 
     const hitLine = document.getElementById('hit-line');
-    const hitLineY = (hitLine.getBoundingClientRect().top - fZoneRect.top);
+    const hitLineY = hitLine ? (hitLine.getBoundingClientRect().top - fZoneRect.top) : (fZone.offsetHeight - 10);
 
     const animate = () => {
         const currentEl = document.getElementById("n-" + noteId);
@@ -374,14 +526,11 @@ function drop(nData) {
         
         const bottomOfNote = o.y + o.h;
         
-        // MODE AUTO : note jouée automatiquement
         if(currentMode === 'auto' && bottomOfNote >= hitLineY) { 
-            o.ok = true;
             handleKeyPress(o.note, false);
             return; 
         }
         
-        // MODE STEP : note s'arrête sur la ligne
         if(currentMode === 'step' && bottomOfNote >= hitLineY) { 
             isPaused = true; 
             o.y = hitLineY - o.h; 
@@ -402,33 +551,42 @@ function startGame(data, mode) {
     clearTimeout(gameLoopTimeout);
     const fZone = document.getElementById('fall-zone');
     
-    // VIDE LA ZONE mais GARDE la ligne de jeu
-    const hitLine = document.getElementById('hit-line');
+    // VIDE TOUT
     fZone.innerHTML = '';
-    if (hitLine) {
-        fZone.appendChild(hitLine); // Remet la ligne immédiatement
+    
+    // Détermine les couleurs selon le mode
+    let lineColor, glowColor;
+    if (colorMode === 'expert') {
+        lineColor = '#ff4500'; // Orange/rouge
+        glowColor = '#ff0000'; // Rouge vif
+    } else if (colorMode === 'intermediaire') {
+        lineColor = '#00d9ff'; // Cyan
+        glowColor = '#0080ff'; // Bleu
+    } else {
+        lineColor = '#00f2ff'; // Cyan néon (débutant)
+        glowColor = '#00f2ff'; // Accent débutant
     }
+    
+    // CRÉE LA LIGNE AVEC LA BONNE COULEUR
+    const hitLine = document.createElement('div');
+    hitLine.id = 'hit-line';
+    hitLine.style.cssText = `
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 4px !important;
+        background: linear-gradient(90deg, transparent, #fff, ${lineColor}, #fff, transparent) !important;
+        box-shadow: 0 0 20px ${glowColor}, 0 0 40px ${lineColor} !important;
+        z-index: 99999 !important;
+        animation: hitline-pulse 1s infinite !important;
+    `;
+    fZone.appendChild(hitLine);
     
     notesOnScreen = []; 
     document.getElementById('main-menu').style.display='none'; 
     document.getElementById('game-container').style.display='flex';
     fZone.style.width = document.getElementById('piano').offsetWidth + "px";
-    
-    // CRÉER LA LIGNE SI ELLE N'EXISTE PAS
-    if (!document.getElementById('hit-line')) {
-        const newHitLine = document.createElement('div');
-        newHitLine.id = 'hit-line';
-        newHitLine.style.cssText = `
-            position: absolute !important;
-            bottom: 180px !important;
-            width: 100% !important;
-            height: 4px !important;
-            background: linear-gradient(90deg, transparent, #fff, #ff00ff, #fff, transparent) !important;
-            box-shadow: 0 0 20px var(--accent), 0 0 40px #ff00ff !important;
-            z-index: 99999 !important;
-        `;
-        fZone.appendChild(newHitLine);
-    }
     
     notesValidated = 0; 
     totalNotesInLevel = data.notes.length; 
@@ -589,7 +747,6 @@ async function toggleMic() {
                 if (f !== -1 && f > 60 && f < 2000) {
                     let n = getNoteFromFreq(f); 
                     if (n) {
-                        console.log("Note détectée :", n);
                         handleKeyPress(n); 
                     }
                 }
@@ -635,20 +792,42 @@ function getNoteFromFreq(f) {
 
 function toggleColorMode() {
     const btn = document.getElementById('color-mode-btn');
+    const hitLine = document.getElementById('hit-line');
+    
     if (colorMode === 'debutant') {
         colorMode = 'intermediaire';
         btn.textContent = "Intermédiaire";
         btn.style.color = "var(--medium)";
+        
+        // Met à jour la ligne si elle existe
+        if (hitLine) {
+            hitLine.style.background = 'linear-gradient(90deg, transparent, #fff, #00d9ff, #fff, transparent) !important';
+            hitLine.style.boxShadow = '0 0 20px #0080ff, 0 0 40px #00d9ff !important';
+        }
+        
     } else if (colorMode === 'intermediaire') {
         colorMode = 'expert';
         btn.textContent = "🔥 EXPERT";
         btn.style.color = "#ff00ff";
         btn.classList.add('expert-glow');
+        
+        // Met à jour la ligne si elle existe
+        if (hitLine) {
+            hitLine.style.background = 'linear-gradient(90deg, transparent, #fff, #ff4500, #fff, transparent) !important';
+            hitLine.style.boxShadow = '0 0 20px #ff0000, 0 0 40px #ff4500 !important';
+        }
+        
     } else {
         colorMode = 'debutant';
         btn.textContent = "Débutant";
         btn.style.color = "var(--accent)";
         btn.classList.remove('expert-glow');
+        
+        // Met à jour la ligne si elle existe
+        if (hitLine) {
+            hitLine.style.background = 'linear-gradient(90deg, transparent, #fff, #00f2ff, #fff, transparent) !important';
+            hitLine.style.boxShadow = '0 0 20px #00f2ff, 0 0 40px #00f2ff !important';
+        }
     }
 }
 
@@ -659,7 +838,7 @@ document.addEventListener('keydown', (e) => {
         'g': 'F#4', 'h': 'G#4', 'j': 'A#4'
     };
     if (keyMap[e.key.toLowerCase()]) {
-        handleKeyPress(keyMap[e.key.toLowerCase()]);
+        handleKeyPress(keyMap[e.key.toLowerCase()], true);
     }
 });
 
