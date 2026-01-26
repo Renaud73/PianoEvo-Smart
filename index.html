@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <div id="pricing-modal" class="modal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;">
+    <div style="background:#1a1a24; padding:30px; border-radius:20px; border:2px solid var(--accent); text-align:center; max-width:400px;">
+        <h2 style="color:var(--accent);">Passe au niveau PRO ! 🚀</h2>
+        <p>Tu as terminé les niveaux gratuits. Débloque le piano USB et +50 cours pour continuer ta progression.</p>
+        <div style="font-size:24px; font-weight:bold; margin:20px 0;">9,90€ <span style="font-size:14px; color:#888;">/ mois</span></div>
+        <button onclick="isPro=true; closePricing(); switchTab('cours');" style="background:var(--accent); color:black; border:none; padding:15px 30px; border-radius:10px; font-weight:bold; cursor:pointer; width:100%;">Débloquer maintenant</button>
+        <button onclick="closePricing()" style="background:transparent; color:#888; border:none; margin-top:15px; cursor:pointer;">Plus tard</button>
+    </div>
+</div>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PianoKid Evo Pro</title>
