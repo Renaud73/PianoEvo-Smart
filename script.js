@@ -3,7 +3,8 @@ const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', '
 const noteColors = { 'C': '#FF0000', 'D': '#FF7F00', 'E': '#FFFF00', 'F': '#00FF00', 'G': '#0000FF', 'A': '#4B0082', 'B': '#8B00FF' };
 let gameLoopTimeout;
 let currentSpeed = 4;
-let isPro = JSON.parse(localStorage.getItem('pk_isPro')) || false;
+// INITIALISATION PRO - FORCÉE À FALSE SI PAS DANS LOCALSTORAGE
+window.isPro = window.isPro || false;
 let selectedRole = 'enfant';
 let selectedEmoji = '🎹';
 let audioContext, notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
@@ -13,6 +14,15 @@ let currentLevelTitle = "", isMicActive = false;
 let audioAnalyser, microphoneStream, pitchBuffer = new Float32Array(2048);
 let colorMode = 'debutant';
 
+// Fonction pour réinitialiser PRO (debug)
+function resetPro() {
+    localStorage.removeItem('pk_isPro');
+    isPro = false;
+    alert('Mode PRO réinitialisé. Rechargez la page.');
+    location.reload();
+}
+
+// Le reste de votre window.onload etc...
 window.onload = () => { 
     initPiano(); 
     updateProfileDisplay(); 
@@ -23,6 +33,16 @@ window.onload = () => {
     
     setupMIDI();
 };
+// Vérification automatique après retour de Stripe
+window.addEventListener('load', () => {
+ const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_success') === 'true') {
+        isPro = true;
+        localStorage.setItem('pk_isPro', true);
+        // alert("Félicitations ! Votre compte est maintenant PRO. 🎉"); // COMMENTÉ
+        window.history.replaceState({}, document.title, "/");
+    }
+});
 
 const DATA = {
     cours: [
@@ -130,51 +150,106 @@ function initPiano() {
 
 function switchTab(tabType) {
     const g = document.getElementById('content-grid'); 
+    if (!g) return;
     g.innerHTML = '';
+    
+    // Mettre à jour les onglets actifs
     document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
         const onclickAttr = btn.getAttribute('onclick');
-        if (onclickAttr && onclickAttr.includes(`'${tabType}'`)) btn.classList.add('active');
-        else btn.classList.remove('active');
+        if (onclickAttr && onclickAttr.includes(`'${tabType}'`)) {
+            btn.classList.add('active');
+        }
     });
 
     const currentP = profiles.find(p => p.name === currentProfileName) || profiles[0];
     const completed = currentP.completed || [];
     const isEnfant = currentP.role === 'enfant';
-
     const items = DATA[tabType] || [];
+
     items.forEach((item, index) => {
-        // Logique de verrouillage :
-        // 1. Progression enfant (doit finir le précédent)
-        const isProgressionLocked = isEnfant && index > 0 && !completed.includes(items[index-1].titre);
-        // 2. Limite gratuite (index > 2 signifie à partir du 4ème élément)
-        const isPremiumLocked = !isPro && index > 2;
-        
-        const c = document.createElement('div'); 
-        // On ajoute une classe 'premium' pour le style si c'est payant
-        c.className = `card ${isProgressionLocked || isPremiumLocked ? 'locked' : ''} ${isPremiumLocked ? 'premium-card' : ''}`;
-        
-        c.innerHTML = `
-            <div style="display:flex; justify-content:space-between; font-size:10px;">
-                <b class="diff-${item.diff}">${item.diff.toUpperCase()}</b>
-                <span>${isPremiumLocked ? '💎' : (completed.includes(item.titre) ? '✅' : '')}</span>
-            </div>
-            <div style="margin-top:5px; font-weight:bold;">
-                ${isProgressionLocked ? '🔒 Verrouillé' : (isPremiumLocked ? '✨ Version PRO' : item.titre)}
-            </div>
-        `;
-        
-        c.onclick = () => { 
-            if (isPremiumLocked) {
-                openPricing(); // Ouvre la fenêtre de paiement
-            } else if (!isProgressionLocked) {
-                currentLevelTitle = item.titre; 
-                const mode = (tabType === 'musique') ? 'auto' : 'step'; 
-                startGame(item, mode); 
+        // DÉTERMINER SI PREMIUM
+        let isPremium = false;
+        if (!isPro) {
+            if ((tabType === 'cours' || tabType === 'exercices') && index >= 3) {
+                isPremium = true; // 4ème et +
+            } else if ((tabType === 'apprentissage' || tabType === 'musique') && index >= 2) {
+                isPremium = true; // 3ème et +
             }
-        };
-        g.appendChild(c);
+        }
+        
+        const isLocked = isEnfant && index > 0 && !completed.includes(items[index-1].titre);
+        
+        const card = document.createElement('div'); 
+        card.className = 'card';
+        
+        // STYLE
+        if (isPremium) {
+            card.style.cssText = 'background: linear-gradient(135deg, #1a1a2e, #2d1b4e) !important; border: 2px solid gold !important; position: relative;';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <b style="color:${item.diff === 'easy' ? '#2ecc71' : item.diff === 'medium' ? '#f1c40f' : '#e74c3c'}; font-size:10px;">${item.diff.toUpperCase()}</b>
+                    <span style="font-size:20px; animation:pulse 2s infinite;">💎</span>
+                </div>
+                <div style="font-weight:bold; color:gold; text-shadow:0 0 10px rgba(255,215,0,0.5);">VERSION PRO</div>
+                <div style="font-size:0.8rem; color:#888;">${item.titre}</div>
+            `;
+            card.onclick = () => openPricing();
+        } else if (isLocked) {
+            card.className += ' locked';
+            card.style.opacity = '0.4';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <b style="color:#666; font-size:10px;">${item.diff.toUpperCase()}</b>
+                    <span>🔒</span>
+                </div>
+                <div style="font-weight:bold; color:#666;">Verrouillé</div>
+            `;
+        } else {
+            const isDone = completed.includes(item.titre);
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <b style="color:${item.diff === 'easy' ? '#2ecc71' : item.diff === 'medium' ? '#f1c40f' : '#e74c3c'}; font-size:10px;">${item.diff.toUpperCase()}</b>
+                    ${isDone ? '✅' : ''}
+                </div>
+                <div style="font-weight:bold;">${item.titre}</div>
+            `;
+            card.onclick = () => {
+                currentLevelTitle = item.titre; 
+                startGame(item, tabType === 'musique' ? 'auto' : 'step');
+            };
+        }
+        
+        g.appendChild(card);
     });
 }
+
+// Si ces fonctions n'existent pas déjà, ajoutez-les à la fin du fichier :
+function openPricing() {
+    const modal = document.getElementById('pricing-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closePricing() {
+    const modal = document.getElementById('pricing-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function unlockPro() {
+    // Si l'utilisateur n'est pas connecté, on le force à s'inscrire d'abord
+    const userEmail = document.getElementById('display-username').innerText;
+    if (userEmail === "Apprenti" || userEmail === "Invité") {
+        alert("Crée un compte gratuit avant de passer PRO !");
+        document.getElementById('auth-modal').style.display = 'flex';
+        return;
+    }
+
+    // Ici, tu mettras ton lien Stripe officiel
+    console.log("Direction vers le paiement...");
+    window.location.href = "https://buy.stripe.com/TON_LIEN_STRIPE"; 
+}
+
+
 
 function handleKeyPress(note, isManual = false) {
     const k = document.querySelector(`.key[data-note="${note}"]`);
@@ -686,9 +761,18 @@ function selectProfile(n) {
     switchTab('cours'); 
 }
 
-function openProfileModal() { 
-    document.getElementById('profile-modal').style.display = 'flex'; 
-    setupEmojiPicker(); 
+function openProfileModal() {
+    // On regarde ce qui est écrit dans le bouton de profil du HTML
+    const currentName = document.getElementById('display-username').innerText;
+
+    if (currentName === "Invité" || currentName === "Apprenti") {
+        // Si c'est un invité, on ouvre la fenêtre Firebase du HTML
+        document.getElementById('auth-modal').style.display = 'flex';
+    } else {
+        // Si c'est un utilisateur connecté, on ouvre ton menu de profils habituel
+        document.getElementById('profile-modal').style.display = 'flex';
+        renderProfiles();
+    }
 }
 
 function closeProfileModal() { 
@@ -883,7 +967,12 @@ function midiNoteToName(midiNumber) {
     return notes[midiNumber % 12] + octave; 
 }
 function openPricing() {
-    document.getElementById('pricing-modal').style.display = 'flex';
+    const modal = document.getElementById('pricing-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error("Le modal avec l'ID 'pricing-modal' n'existe pas dans le HTML");
+    }
 }
 
 function closePricing() {
@@ -898,25 +987,57 @@ function unlockPro() {
     const activeTab = document.querySelector('.tab-btn.active').getAttribute('onclick').match(/'([^']+)'/)[1];
     switchTab(activeTab); // On rafraîchit l'affichage
     alert("Merci ! Tu es maintenant PRO 🚀");
-}// Ouvre la fenêtre de paiement
+}// 1. Ouvre la fenêtre (reste identique)
 function openPricing() {
-    document.getElementById('pricing-modal').style.display = 'flex';
+    const modal = document.getElementById('pricing-modal');
+    if (modal) modal.style.display = 'flex';
 }
 
-// Ferme la fenêtre
+// 2. Ferme la fenêtre (reste identique)
 function closePricing() {
-    document.getElementById('pricing-modal').style.display = 'none';
+    const modal = document.getElementById('pricing-modal');
+    if (modal) modal.style.display = 'none';
 }
 
-// Simule l'achat et débloque tout
+// 3. LA FONCTION OFFICIELLE : Redirection vers le paiement
 function unlockPro() {
-    isPro = true;
-    localStorage.setItem('pk_isPro', true); // Sauvegarde dans le navigateur
-    closePricing();
+    // Au lieu de mettre isPro = true tout de suite, 
+    // on redirige vers ta page de paiement Stripe ou PayPal
+    console.log("Redirection vers le checkout officiel...");
     
-    // On rafraîchit l'affichage pour montrer que les cadenas ont disparu
-    const activeTab = document.querySelector('.tab-btn.active').textContent.toLowerCase().includes('cours') ? 'cours' : 'musique';
-    switchTab(activeTab);
-    
-    alert("Félicitations ! Vous êtes maintenant membre PRO 🚀");
+    // REMPLACE le lien ci-dessous par ton lien de paiement réel
+    window.location.href = "https://buy.stripe.com/votre_lien_de_paiement_officiel";
 }
+window.handleAuth = async () => {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    
+    // On récupère les outils Firestore importés plus haut (db)
+    // Assure-toi d'avoir : import { doc, setDoc ... } from "..."
+    
+    try {
+        if (isSignUpMode) {
+            // 1. CRÉATION DU COMPTE (Onglet Authentication)
+            const result = await createUserWithEmailAndPassword(auth, email, password);
+            const user = result.user;
+
+            // 2. CRÉATION AUTOMATIQUE DANS FIRESTORE (Onglet Database)
+            // On crée un document dans la collection "users" avec l'ID de l'utilisateur
+            await setDoc(doc(db, "users", user.uid), {
+                email: email,
+                isPro: false, // Par défaut, il n'est pas PRO
+                createdAt: new Date(),
+                username: email.split('@')[0] // Nom provisoire
+            });
+
+            alert("Compte créé avec succès dans Authentication ET Firestore !");
+        } else {
+            // Connexion simple
+            await signInWithEmailAndPassword(auth, email, password);
+        }
+        document.getElementById('auth-modal').style.display = 'none';
+    } catch (error) {
+        console.error("Erreur détaillée :", error);
+        alert("Erreur : " + error.message);
+    }
+};
