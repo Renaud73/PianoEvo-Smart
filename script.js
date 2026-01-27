@@ -1,10 +1,9 @@
 const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const noteNamesFR = { 'C': 'DO', 'D': 'RÉ', 'E': 'MI', 'F': 'FA', 'G': 'SOL', 'A': 'LA', 'B': 'SI' };
 const noteColors = { 'C': '#FF0000', 'D': '#FF7F00', 'E': '#FFFF00', 'F': '#00FF00', 'G': '#0000FF', 'A': '#4B0082', 'B': '#8B00FF' };
-const availableEmojis = ["🎹", "🎵", "🎶", "🎼", "🎤", "🎸", "🎺", "🎻", "🥁", "🎬", "🎭", "🎪", "🎨", "🎰", "🎲", "🎳", "🎯", "🎮"];
 let gameLoopTimeout;
 let currentSpeed = 4;
-
+let isPro = JSON.parse(localStorage.getItem('pk_isPro')) || false;
 let selectedRole = 'enfant';
 let selectedEmoji = '🎹';
 let audioContext, notesOnScreen = [], isPaused = false, currentMode = 'step', totalNotesInLevel = 0, notesValidated = 0;
@@ -144,25 +143,35 @@ function switchTab(tabType) {
 
     const items = DATA[tabType] || [];
     items.forEach((item, index) => {
-        const isLocked = isEnfant && index > 0 && !completed.includes(items[index-1].titre);
+        // Logique de verrouillage :
+        // 1. Progression enfant (doit finir le précédent)
+        const isProgressionLocked = isEnfant && index > 0 && !completed.includes(items[index-1].titre);
+        // 2. Limite gratuite (index > 2 signifie à partir du 4ème élément)
+        const isPremiumLocked = !isPro && index > 2;
         
         const c = document.createElement('div'); 
-        c.className = `card ${isLocked ? 'locked' : ''}`;
+        // On ajoute une classe 'premium' pour le style si c'est payant
+        c.className = `card ${isProgressionLocked || isPremiumLocked ? 'locked' : ''} ${isPremiumLocked ? 'premium-card' : ''}`;
+        
         c.innerHTML = `
             <div style="display:flex; justify-content:space-between; font-size:10px;">
                 <b class="diff-${item.diff}">${item.diff.toUpperCase()}</b>
-                <span>${completed.includes(item.titre) ? '✅' : ''}</span>
+                <span>${isPremiumLocked ? '💎' : (completed.includes(item.titre) ? '✅' : '')}</span>
             </div>
-            <div style="margin-top:5px; font-weight:bold;">${isLocked ? '🔒 Verrouillé' : item.titre}</div>
+            <div style="margin-top:5px; font-weight:bold;">
+                ${isProgressionLocked ? '🔒 Verrouillé' : (isPremiumLocked ? '✨ Version PRO' : item.titre)}
+            </div>
         `;
         
-        if(!isLocked) {
-            c.onclick = () => { 
+        c.onclick = () => { 
+            if (isPremiumLocked) {
+                openPricing(); // Ouvre la fenêtre de paiement
+            } else if (!isProgressionLocked) {
                 currentLevelTitle = item.titre; 
                 const mode = (tabType === 'musique') ? 'auto' : 'step'; 
                 startGame(item, mode); 
-            };
-        }
+            }
+        };
         g.appendChild(c);
     });
 }
@@ -872,4 +881,42 @@ function midiNoteToName(midiNumber) {
     const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     const octave = Math.floor(midiNumber / 12) - 1;
     return notes[midiNumber % 12] + octave; 
+}
+function openPricing() {
+    document.getElementById('pricing-modal').style.display = 'flex';
+}
+
+function closePricing() {
+    document.getElementById('pricing-modal').style.display = 'none';
+}
+
+// Fonction appelée quand l'utilisateur clique sur "Débloquer maintenant"
+function unlockPro() {
+    isPro = true;
+    localStorage.setItem('pk_isPro', true); // On sauvegarde l'achat
+    closePricing();
+    const activeTab = document.querySelector('.tab-btn.active').getAttribute('onclick').match(/'([^']+)'/)[1];
+    switchTab(activeTab); // On rafraîchit l'affichage
+    alert("Merci ! Tu es maintenant PRO 🚀");
+}// Ouvre la fenêtre de paiement
+function openPricing() {
+    document.getElementById('pricing-modal').style.display = 'flex';
+}
+
+// Ferme la fenêtre
+function closePricing() {
+    document.getElementById('pricing-modal').style.display = 'none';
+}
+
+// Simule l'achat et débloque tout
+function unlockPro() {
+    isPro = true;
+    localStorage.setItem('pk_isPro', true); // Sauvegarde dans le navigateur
+    closePricing();
+    
+    // On rafraîchit l'affichage pour montrer que les cadenas ont disparu
+    const activeTab = document.querySelector('.tab-btn.active').textContent.toLowerCase().includes('cours') ? 'cours' : 'musique';
+    switchTab(activeTab);
+    
+    alert("Félicitations ! Vous êtes maintenant membre PRO 🚀");
 }
